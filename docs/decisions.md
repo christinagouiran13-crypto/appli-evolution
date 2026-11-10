@@ -19,5 +19,6 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 
 - **Supabase**, région Union européenne (Francfort) : comptes et mots de passe, base de données, messagerie en temps réel, photos et vocaux, envois programmés. Un seul compte à créer.
 - **Appli web installable (PWA)** : pas d'App Store, notifications push standard (Web Push) envoyées depuis Supabase.
-- **Hébergement de l'appli** : GitHub Pages (compte GitHub déjà existant), à l'adresse app.evolutioncoaching.fr. Aucune donnée de cliente n'y est stockée : elles restent toutes chez Supabase, en Europe.
+- **Hébergement de l'appli** : GitHub Pages (compte GitHub déjà existant), à l'adresse app.evolution-coaching.fr. Aucune donnée de cliente n'y est stockée : elles restent toutes chez Supabase, en Europe.
 - Coût de départ : 0 €. Plus tard : formule Supabase payante (environ 25 $/mois) pour les sauvegardes quotidiennes automatiques, dès que de vraies clientes utilisent l'appli.
+- Adresse de l'appli : **app.evolution-coaching.fr** (le domaine de Christina chez OVH s'écrit avec un tiret).
