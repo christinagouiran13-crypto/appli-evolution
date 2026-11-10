@@ -1,0 +1,103 @@
+# Mise en ligne automatique de l'appli Évolution.
+# À chaque modification sur la branche « main » :
+#   1. la base de données et les fonctions serveur sont mises à jour sur Supabase (UE) ;
+#   2. l'appli est construite et publiée sur app.evolutioncoaching.fr.
+#
+# Secrets à créer une fois dans GitHub (Settings > Secrets and variables > Actions) :
+#   SUPABASE_PROJECT_REF   identifiant du projet Supabase (ex. abcdefghijklmnop)
+#   SUPABASE_ACCESS_TOKEN  jeton personnel Supabase
+#   SUPABASE_DB_PASSWORD   (facultatif) mot de passe de la base, choisi à la création du projet
+
+name: Mise en ligne
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  APP_URL: https://app.evolutioncoaching.fr
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+  PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+jobs:
+  backend:
+    name: Base de données et fonctions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.1.0
+
+      - name: Relier le projet Supabase
+        run: supabase link --project-ref "$PROJECT_REF" --yes
+
+      - name: Mettre à jour la base de données
+        run: |
+          if [ -n "$SUPABASE_DB_PASSWORD" ]; then
+            supabase db push --remote --include-all --password "$SUPABASE_DB_PASSWORD" --yes
+          else
+            supabase db push --remote --include-all --yes
+          fi
+
+      - name: Déployer les fonctions serveur
+        run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api --yes
+
+      - name: Régler l'adresse de l'appli et l'authentification
+        run: |
+          api="https://api.supabase.com/v1/projects/$PROJECT_REF"
+          auth=(-H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json")
+          sql="update private.config set functions_url = 'https://$PROJECT_REF.supabase.co/functions/v1'; update public.app_settings set app_url = '$APP_URL';"
+          curl -fsS -X POST "$api/database/query" "${auth[@]}" -d "$(jq -n --arg q "$sql" '{query: $q}')" > /dev/null
+          curl -fsS -X PATCH "$api/config/auth" "${auth[@]}" -d "$(jq -n --arg url "$APP_URL" '{
+            site_url: $url,
+            uri_allow_list: ($url + "/**"),
+            disable_signup: true,
+            password_min_length: 8
+          }')" > /dev/null
+          echo "Réglages appliqués."
+
+  frontend:
+    name: Appli (écrans)
+    needs: backend
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ env.APP_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Récupérer la clé publique Supabase
+        run: |
+          keys=$(curl -fsS "https://api.supabase.com/v1/projects/$PROJECT_REF/api-keys" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")
+          key=$(echo "$keys" | jq -r '([.[] | select(.type == "publishable")][0].api_key) // ([.[] | select(.name == "anon")][0].api_key)')
+          echo "VITE_SUPABASE_ANON_KEY=$key" >> "$GITHUB_ENV"
+          echo "VITE_SUPABASE_URL=https://$PROJECT_REF.supabase.co" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      - run: npm run build
+      - name: Pages de secours (navigation directe)
+        run: cp dist/index.html dist/404.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - uses: actions/deploy-pages@v4
