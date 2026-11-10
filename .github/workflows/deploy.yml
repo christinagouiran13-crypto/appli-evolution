@@ -37,6 +37,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Nettoyer les secrets (espaces en trop d'un copier-coller)
+        run: |
+          ref=$(printf '%s' "$PROJECT_REF" | tr -d '[:space:]')
+          tok=$(printf '%s' "$SUPABASE_ACCESS_TOKEN" | tr -d '[:space:]')
+          pwd=$(printf '%s' "$SUPABASE_DB_PASSWORD" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          echo "::add-mask::$tok"
+          if [ -n "$pwd" ]; then echo "::add-mask::$pwd"; fi
+          {
+            echo "PROJECT_REF=$ref"
+            echo "SUPABASE_ACCESS_TOKEN=$tok"
+            echo "SUPABASE_DB_PASSWORD=$pwd"
+          } >> "$GITHUB_ENV"
+
       - uses: supabase/setup-cli@v1
         with:
           version: 3.1.0
@@ -78,6 +91,19 @@ jobs:
       url: ${{ env.APP_URL }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Nettoyer les secrets (espaces en trop d'un copier-coller)
+        run: |
+          ref=$(printf '%s' "$PROJECT_REF" | tr -d '[:space:]')
+          tok=$(printf '%s' "$SUPABASE_ACCESS_TOKEN" | tr -d '[:space:]')
+          pwd=$(printf '%s' "$SUPABASE_DB_PASSWORD" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          echo "::add-mask::$tok"
+          if [ -n "$pwd" ]; then echo "::add-mask::$pwd"; fi
+          {
+            echo "PROJECT_REF=$ref"
+            echo "SUPABASE_ACCESS_TOKEN=$tok"
+            echo "SUPABASE_DB_PASSWORD=$pwd"
+          } >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v4
         with:
