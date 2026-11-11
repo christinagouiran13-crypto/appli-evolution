@@ -94,3 +94,8 @@ export type Resource = {
 };
 
 export type JuniorMission = { id: string; position: number; title: string; body: string };
+
+export type Feedback = {
+  id: string; rider_id: string; competition_id: string | null; date: string; title: string;
+  answers: Record<string, string>; coach_read_at: string | null; created_at: string;
+};

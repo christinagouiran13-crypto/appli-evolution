@@ -49,6 +49,7 @@ export function badgeName(b: BadgeDef, p: Pick<Profile, "gender"> | null) {
 export const ALERT_LABEL: Record<string, string> = {
   urgent: "URGENCE",
   new_signup: "Nouvelle inscription",
+  feedback_unread: "Feedback à lire",
   confidence_drop: "Confiance en baisse",
   stress_high: "Stress élevé",
   dropout: "Décrochage",
@@ -58,3 +59,14 @@ export const ALERT_LABEL: Record<string, string> = {
   program_end: "Fin de programme",
   deletion: "Suppression demandée",
 };
+
+// Questionnaire de feedback après concours (questions de Christina)
+export const FEEDBACK_QUESTIONS: { key: string; f: string; m: string }[] = [
+  { key: "q1", f: "Qu'est-ce que tu as trouvé le plus difficile mentalement pendant le concours ?", m: "Qu'est-ce que tu as trouvé le plus difficile mentalement pendant le concours ?" },
+  { key: "q2", f: "Est-ce qu'il y a un moment où tu t'es sentie vraiment bien dans ta tête et avec ton cheval ?", m: "Est-ce qu'il y a un moment où tu t'es senti vraiment bien dans ta tête et avec ton cheval ?" },
+  { key: "q3", f: "D'un point de vue technique, qu'est-ce que tu penses devoir encore améliorer ?", m: "D'un point de vue technique, qu'est-ce que tu penses devoir encore améliorer ?" },
+  { key: "q4", f: "Sur quels points tu penses avoir progressé ? Mental et technique.", m: "Sur quels points tu penses avoir progressé ? Mental et technique." },
+  { key: "q5", f: "Qu'est-ce qui t'a le plus aidée pendant le concours ?", m: "Qu'est-ce qui t'a le plus aidé pendant le concours ?" },
+  { key: "q6", f: "Qu'est-ce que tu aurais aimé avoir en plus (exercice, conseil, préparation…) ?", m: "Qu'est-ce que tu aurais aimé avoir en plus (exercice, conseil, préparation…) ?" },
+  { key: "q7", f: "Si tu devais refaire le concours, qu'est-ce que tu changerais ?", m: "Si tu devais refaire le concours, qu'est-ce que tu changerais ?" },
+];

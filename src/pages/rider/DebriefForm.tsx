@@ -111,6 +111,7 @@ export default function DebriefForm() {
       {sent && !share && (
         <Celebration title="Débrief envoyé !" onClose={() => nav("/concours")}>
           <p style={{ margin: 0 }}>Il est rangé dans ton historique. Christina le lit et te répond dans ta conversation.</p>
+          <button className="btn" onClick={() => nav(`/concours/feedback${compId ? `?concours=${compId}` : ""}`)}>Remplir aussi mon feedback</button>
           {f.result === "sans_faute" && (
             <button className="btn btn-light" onClick={() => setShare(true)}>Partager mon sans-faute au groupe</button>
           )}
