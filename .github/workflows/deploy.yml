@@ -65,6 +65,20 @@ jobs:
             supabase db push --remote --include-all --yes
           fi
 
+      - name: Clé Calendly (facultative)
+        env:
+          CALENDLY_TOKEN: ${{ secrets.CALENDLY_TOKEN }}
+        run: |
+          tok=$(printf '%s' "$CALENDLY_TOKEN" | tr -d '[:space:]')
+          if [ -n "$tok" ]; then
+            echo "::add-mask::$tok"
+            printf 'CALENDLY_TOKEN=%s\n' "$tok" > "$RUNNER_TEMP/calendly.env"
+            supabase secrets set --env-file "$RUNNER_TEMP/calendly.env" --yes
+            rm -f "$RUNNER_TEMP/calendly.env"
+          else
+            echo "Pas de clé Calendly : les dates ne seront pas remplies automatiquement."
+          fi
+
       - name: Déployer les fonctions serveur
         run: supabase functions deploy --project-ref "$PROJECT_REF" --use-api --yes
 

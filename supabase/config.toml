@@ -436,3 +436,6 @@ verify_jwt = false
 
 [functions.signup]
 verify_jwt = false
+
+[functions.booking]
+verify_jwt = false

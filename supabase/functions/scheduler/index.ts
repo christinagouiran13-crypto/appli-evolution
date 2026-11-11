@@ -182,7 +182,10 @@ Deno.serve(async (req) => {
   if (hour >= 10) {
     const { data: upcoming } = await db.from("sessions").select("rider_id")
       .eq("done", false).gte("scheduled_at", now.toISOString());
-    const booked = new Set((upcoming ?? []).map((s) => s.rider_id));
+    // Réservée sur Calendly sans date connue : on considère qu'elle a lieu dans les 15 jours
+    const { data: recent } = await db.from("sessions").select("rider_id")
+      .eq("done", false).is("scheduled_at", null).gte("booked_at", new Date(now.getTime() - 15 * 86400000).toISOString());
+    const booked = new Set([...(upcoming ?? []), ...(recent ?? [])].map((s) => s.rider_id));
     for (const r of riders) {
       if (booked.has(r.id)) continue;
       const since = parisNow(new Date(r.activated_at!)).date;

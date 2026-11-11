@@ -327,7 +327,7 @@ function Seances({ p }: { p: Profile }) {
 
   return (
     <div className="stack">
-      <div className="hint">Quand elle réserve sur Calendly, tu reçois l'e-mail de Calendly : reporte ici la date et l'heure. Elle recevra un rappel la veille.</div>
+      <div className="hint">Quand elle réserve depuis l'appli, la séance suivante se marque « Réservée » toute seule (avec la date si la clé Calendly est configurée). Tu peux toujours corriger une date ici.</div>
       {list.length === 0 && p.program === "starter90" && <button className="btn" style={{ alignSelf: "flex-start" }} onClick={createStarter}>Créer ses 5 séances Starter 90</button>}
       {msg && <div className="success">{msg}</div>}
       <div className="cards">
@@ -345,7 +345,7 @@ function SessionCard({ s, onSave, onDelete }: { s: Session; onSave: (s: Session)
     <div className="card card-lg stack-sm">
       <div className="row-between">
         <b>{s.number ? `Séance ${s.number}` : "Séance"}</b>
-        {s.done ? <span className="tag tag-vert">Faite</span> : s.scheduled_at ? <span className="tag tag-gris">{fmtDateTime(s.scheduled_at)}</span> : <span className="tag tag-rose">À réserver</span>}
+        {s.done ? <span className="tag tag-vert">Faite</span> : s.scheduled_at ? <span className="tag tag-gris">{fmtDateTime(s.scheduled_at)}</span> : s.booked_at ? <span className="tag tag-vert">Réservée sur Calendly</span> : <span className="tag tag-rose">À réserver</span>}
       </div>
       <input className="input" aria-label="Thème" value={f.theme} onChange={(e) => setF({ ...f, theme: e.target.value })} />
       <label className="small muted" htmlFor={`d-${s.id}`}>Date et heure</label>
