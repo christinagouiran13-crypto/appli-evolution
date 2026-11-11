@@ -103,12 +103,13 @@ export function ResourceManager({ riderId }: { riderId: string | null }) {
 
   return (
     <div className="stack">
-      {list.length === 0 && <div className="empty">Rien pour l'instant.</div>}
+      {list.length === 0 && <div className="empty">Rien de plus pour l'instant.</div>}
+      {list.length > 0 && <div className="small bold" style={{ color: "var(--vert)" }}>✓ Déjà en ligne, visible par tes clientes :</div>}
       {list.map((r) => <ResourceCard key={r.id} r={r} onDelete={() => remove(r)} />)}
       <div className="card card-lg stack">
-        <div className="h3">Ajouter</div>
+        <div className="h3">Ajouter un nouvel élément (facultatif)</div>
         <div className="pills" role="group" aria-label="Type">
-          {(Object.keys(CATEGORY_LABEL) as Resource["category"][]).map((k) => (
+          {(["audio", "fichier", "lien"] as Resource["category"][]).map((k) => (
             <button key={k} className="pill" aria-pressed={f.category === k} onClick={() => setF({ ...f, category: k })}>{CATEGORY_LABEL[k]}</button>
           ))}
         </div>
