@@ -94,7 +94,7 @@ export type Resource = {
   title: string; description: string | null; path: string | null; url: string | null; created_at: string;
 };
 
-export type JuniorMission = { id: string; position: number; title: string; body: string };
+export type JuniorMission = { id: string; position: number; title: string; body: string; after_message: string; pdf_path: string | null };
 
 export type Feedback = {
   id: string; rider_id: string; competition_id: string | null; date: string; title: string;

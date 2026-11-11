@@ -36,7 +36,7 @@ export default function Sessions() {
       {me.status === "active" && (
         <div className="card-soft stack">
           <div className="h3">Prendre rendez-vous</div>
-          <div className="small">Choisis ton créneau dans l'agenda de Christina, directement ici. Ta séance s'ajoute toute seule{me.is_junior ? ", et ta mission arrive dans tes messages" : ""}.</div>
+          <div className="small">Choisis ton créneau dans l'agenda de Christina, directement ici. Ta séance s'ajoute toute seule{me.is_junior ? ", et après chaque séance ta nouvelle mission arrive dans tes messages" : ""}.</div>
           <button className="btn" style={{ alignSelf: "flex-start" }} onClick={book}><Icon name="calendar" size={18} />Réserver ma séance</button>
         </div>
       )}
