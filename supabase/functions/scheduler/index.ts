@@ -195,6 +195,19 @@ Deno.serve(async (req) => {
     }
   }
 
+  // 6 ter. Juniors : la mission part environ 1 heure après la séance
+  {
+    const { data: past } = await db.from("sessions").select("id, rider_id")
+      .eq("done", false)
+      .lte("scheduled_at", new Date(now.getTime() - 3600000).toISOString())
+      .gte("scheduled_at", new Date(now.getTime() - 3 * 86400000).toISOString());
+    for (const s of past ?? []) {
+      if (!byId.has(s.rider_id)) continue;
+      const { data: ok } = await db.rpc("deliver_junior_mission", { sid: s.id });
+      if (ok) ctx.sent.push(`junior_mission:${byId.get(s.rider_id)!.first_name}`);
+    }
+  }
+
   // 7. Badge « 3 mois d'Évolution »
   const threeMonthsAgo = new Date(now);
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);

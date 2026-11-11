@@ -40,7 +40,7 @@ export function BookingModal({ onClose, onBooked }: { onClose: () => void; onBoo
       <Celebration title={done.number ? `Séance ${done.number} réservée !` : "Séance réservée !"} onClose={onClose}>
         <p style={{ margin: 0 }}>
           {profile.is_junior
-            ? "Ta mission pour préparer cette séance t'attend dans tes messages."
+            ? "Tu reçois la confirmation par e-mail. Après la séance, ta nouvelle mission arrivera dans tes messages."
             : "Tu reçois la confirmation par e-mail. Christina est prévenue."}
         </p>
       </Celebration>
