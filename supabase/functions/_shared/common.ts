@@ -58,7 +58,7 @@ export async function checkInternal(req: Request, db: SupabaseClient) {
   return req.headers.get("x-internal-secret") === cfg.internal_secret;
 }
 
-export type PushPayload = { title: string; body: string; url?: string; tag?: string };
+export type PushPayload = { title: string; body: string; url?: string; tag?: string; urgent?: boolean };
 
 // Envoie une notification à un ou plusieurs comptes. Les abonnements
 // expirés sont supprimés.

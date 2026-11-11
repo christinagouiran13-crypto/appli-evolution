@@ -26,3 +26,9 @@ export function SignedAudio({ bucket = "chat", path }: { bucket?: string; path: 
   if (!url) return <div className="small muted">Chargement de l'audio…</div>;
   return <audio controls preload="metadata" src={url} />;
 }
+
+export function SignedVideo({ path }: { path: string }) {
+  const url = useSigned("chat", path);
+  if (!url) return <div className="small muted">Chargement de la vidéo…</div>;
+  return <video controls playsInline preload="metadata" src={url} />;
+}

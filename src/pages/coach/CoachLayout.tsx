@@ -6,6 +6,7 @@ export default function CoachLayout() {
     { to: "/coach", label: "Tableau de bord", end: true },
     { to: "/coach/messages", label: "Messages" },
     { to: "/coach/inviter", label: "Inviter une cliente" },
+    { to: "/coach/indispensables", label: "Indispensables" },
     { to: "/coach/messages-auto", label: "Messages automatiques" },
     { to: "/coach/reglages", label: "Réglages" },
   ];

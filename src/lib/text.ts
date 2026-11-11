@@ -47,6 +47,8 @@ export function badgeName(b: BadgeDef, p: Pick<Profile, "gender"> | null) {
 }
 
 export const ALERT_LABEL: Record<string, string> = {
+  urgent: "URGENCE",
+  new_signup: "Nouvelle inscription",
   confidence_drop: "Confiance en baisse",
   stress_high: "Stress élevé",
   dropout: "Décrochage",

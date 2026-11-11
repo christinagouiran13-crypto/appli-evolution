@@ -13,7 +13,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 registerRoute(new NavigationRoute(createHandlerBoundToURL("index.html")));
 
 self.addEventListener("push", (event) => {
-  let data: { title?: string; body?: string; url?: string; tag?: string } = {};
+  let data: { title?: string; body?: string; url?: string; tag?: string; urgent?: boolean } = {};
   try { data = event.data?.json() ?? {}; } catch { data = { body: event.data?.text() }; }
   event.waitUntil(
     self.registration.showNotification(data.title ?? "Évolution", {
@@ -21,8 +21,10 @@ self.addEventListener("push", (event) => {
       icon: "/icon-192.png",
       badge: "/icon-192.png",
       tag: data.tag,
+      requireInteraction: !!data.urgent,
       data: { url: data.url ?? "/" },
-    }),
+      ...(data.urgent ? { vibrate: [300, 100, 300, 100, 300] } : {}),
+    } as NotificationOptions),
   );
 });
 

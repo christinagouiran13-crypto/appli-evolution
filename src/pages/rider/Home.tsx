@@ -9,6 +9,7 @@ import type { Competition, Message, Session } from "../../lib/types";
 import { Icon } from "../../components/Icon";
 import logo from "../../components/logo-vert.svg";
 import { InstallHint } from "../../components/InstallHint";
+import { UrgentButton } from "../../components/UrgentButton";
 
 type Data = {
   nextComp: Competition | null;
@@ -58,7 +59,10 @@ export default function Home() {
     <div className="page">
       <div className="topbar">
         <div className="brand"><img src={logo} alt="" />Évolution</div>
-        <Link to="/profil" className="icon-btn" aria-label="Mon profil"><Icon name="user" size={20} /></Link>
+        <div className="row" style={{ gap: 8 }}>
+          <UrgentButton />
+          <Link to="/profil" className="icon-btn" aria-label="Mon profil"><Icon name="user" size={20} /></Link>
+        </div>
       </div>
 
       <div className="stack-sm">

@@ -6,7 +6,7 @@ import type { Member, Message } from "../lib/types";
 import { useAuth } from "../lib/auth";
 import { Icon } from "./Icon";
 import { Avatar } from "./Avatar";
-import { SignedAudio, SignedImage } from "./Media";
+import { SignedAudio, SignedImage, SignedVideo } from "./Media";
 
 const PAGE = 150;
 
@@ -191,7 +191,25 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
     } finally { setBusy(false); }
   }
 
+  async function sendVideo(file: File) {
+    if (file.size > 50 * 1024 * 1024) {
+      setError("Cette vidéo est trop lourde (50 Mo maximum). Coupe-la pour garder le passage important, puis renvoie-la.");
+      return;
+    }
+    setBusy(true); setError(null);
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+      const path = `${threadKey(thread)}/${newId()}.${ext}`;
+      await upload("chat", path, file, file.type || "video/mp4");
+      await insert({ video_path: path, body: text.trim() || null });
+      setText("");
+    } catch {
+      setError("La vidéo n'a pas pu être envoyée. Vérifie ta connexion (le Wi-Fi est conseillé).");
+    } finally { setBusy(false); }
+  }
+
   async function sendPhoto(file: File) {
+    if (file.type.startsWith("video/")) return sendVideo(file);
     setBusy(true); setError(null);
     try {
       const blob = await compressImage(file);
@@ -270,13 +288,15 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
                   </div>
                 )}
                 <div
-                  className={`bubble ${m.kind === "victory" ? "victory" : ""}`}
+                  className={`bubble ${m.kind === "victory" ? "victory" : ""} ${m.kind === "urgent" ? "urgent" : ""}`}
                   onClick={() => canAct && setSelected(selected === m.id ? null : m.id)}
                 >
                   {m.kind === "victory" && <div className="tiny bold" style={{ marginBottom: 4 }}>🏆 Victoire partagée</div>}
+                  {m.kind === "urgent" && <div className="tiny bold" style={{ marginBottom: 4 }}>🚨 URGENCE</div>}
                   {m.image_path && <SignedImage path={m.image_path} />}
+                  {m.video_path && <SignedVideo path={m.video_path} />}
                   {m.audio_path && <SignedAudio path={m.audio_path} />}
-                  {m.body && <div style={{ marginTop: m.image_path ? 6 : 0 }}>{m.body}</div>}
+                  {m.body && <div style={{ marginTop: m.image_path || m.video_path ? 6 : 0 }}>{m.body}</div>}
                 </div>
                 <div className="when">
                   {fmtTime(m.created_at)}
@@ -298,18 +318,19 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
           );
         })}
       </div>
+      {busy && <div className="hint" style={{ margin: "0 16px 6px" }} aria-live="polite">Envoi en cours… garde l'appli ouverte.</div>}
       {error && <div className="error" style={{ margin: "0 12px 8px" }}>{error}</div>}
       {readOnly ? (
         <div className="chat-foot"><div className="hint" style={{ padding: 8 }}>{readOnlyText ?? "Cette conversation est en lecture seule."}</div></div>
       ) : (
         <div className="chat-foot">
-          <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => {
+          <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) sendPhoto(f);
             e.target.value = "";
           }} />
           {!recorder.recording && (
-            <button className="icon-btn" aria-label="Envoyer une photo" onClick={() => fileRef.current?.click()} disabled={busy}>
+            <button className="icon-btn" aria-label="Envoyer une photo ou une vidéo" onClick={() => fileRef.current?.click()} disabled={busy}>
               <Icon name="image" size={20} />
             </button>
           )}

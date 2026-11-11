@@ -47,7 +47,7 @@ export default function CoachMessages() {
               <div className="row-between"><span className="h3">{t.rider.first_name} {t.rider.last_name}</span>
                 {t.last && <span className="tiny muted">{relativeDay(t.last.created_at)}</span>}</div>
               <div className="small muted" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontWeight: t.unread ? 700 : 400, color: t.unread ? "var(--vert-fonce)" : undefined }}>
-                {t.last ? (t.last.body ?? (t.last.audio_path ? "Message vocal" : "Photo")) : "Pas encore de message"}
+                {t.last ? (t.last.body ?? (t.last.audio_path ? "Message vocal" : t.last.video_path ? "Vidéo" : "Photo")) : "Pas encore de message"}
               </div>
             </div>
             {t.unread && <span className="tag tag-rose">Nouveau</span>}

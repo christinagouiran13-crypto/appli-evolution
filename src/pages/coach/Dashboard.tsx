@@ -7,8 +7,11 @@ import { ALERT_LABEL, PROGRAM_LABEL } from "../../lib/text";
 import type { Alert } from "../../lib/types";
 import { useCoachData, type ClientRow } from "./useCoachData";
 import { Avatar } from "../../components/Avatar";
+import { FinishButton } from "./ClientDetail";
 
 const ACTION: Record<string, { label: string; tab: string }> = {
+  urgent: { label: "Lui répondre maintenant", tab: "messages" },
+  new_signup: { label: "Vérifier sa fiche", tab: "gestion" },
   confidence_drop: { label: "Lui écrire", tab: "messages" },
   stress_high: { label: "Lui écrire", tab: "messages" },
   dropout: { label: "La relancer", tab: "messages" },
@@ -68,15 +71,16 @@ export default function Dashboard() {
             const r = byId.get(a.rider_id);
             const act = ACTION[a.kind] ?? { label: "Ouvrir la fiche", tab: "suivi" };
             return (
-              <div key={`${a.kind}-${a.ref_key}`} className="card card-lg stack-sm">
+              <div key={`${a.kind}-${a.ref_key}`} className={`card card-lg stack-sm ${a.kind === "urgent" ? "card-urgent" : ""}`}>
                 <div className="row-between">
                   <div className="row"><Avatar path={r?.avatar_path} name={r?.first_name ?? "?"} size={32} /><span className="bold">{r?.first_name} {r?.last_name?.slice(0, 1)}{r?.last_name ? "." : ""}</span></div>
-                  <span className={`tag ${a.kind === "message_waiting" || a.kind === "appointment" ? "tag-vert" : "tag-rose"}`}>{ALERT_LABEL[a.kind] ?? a.kind}</span>
+                  <span className={`tag ${a.kind === "message_waiting" || a.kind === "appointment" || a.kind === "new_signup" ? "tag-vert" : "tag-rose"}`} style={a.kind === "urgent" ? { background: "#B3261E", color: "#fff" } : undefined}>{ALERT_LABEL[a.kind] ?? a.kind}</span>
                 </div>
                 <div className="small" style={{ color: "#3D524B" }}>{a.detail}</div>
                 <div className="tiny muted">{relativeDay(a.created_at)}</div>
                 <div className="row wrap">
                   <button className="btn btn-sm" onClick={() => nav(`/coach/cliente/${a.rider_id}?onglet=${act.tab}`)}>{act.label}</button>
+                  {a.kind === "program_end" && r && <FinishButton p={r} onDone={reload} small />}
                   {a.kind !== "deletion" && <button className="btn btn-sm btn-light" onClick={() => dismiss(a)}>C'est fait</button>}
                 </div>
               </div>

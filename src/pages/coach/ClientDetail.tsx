@@ -14,10 +14,11 @@ import { LineChart } from "../../components/LineChart";
 import { SignedAudio } from "../../components/Media";
 import { PHASES } from "../rider/Routine";
 import { InviteLink } from "./Invite";
+import { ResourceManager } from "../../components/Resources";
 
 const TABS = [
   ["suivi", "Suivi"], ["debriefs", "Débriefs"], ["objectifs", "Objectifs"], ["messages", "Messages"],
-  ["routine", "Routine"], ["seances", "Séances"], ["notes", "Notes privées"], ["gestion", "Gestion"],
+  ["routine", "Routine"], ["indispensables", "Indispensables"], ["seances", "Séances"], ["notes", "Notes privées"], ["gestion", "Gestion"],
 ] as const;
 
 export default function ClientDetail() {
@@ -50,6 +51,7 @@ export default function ClientDetail() {
           </div>
           {p.season_goal && <div className="small">Objectif de saison : <b>{p.season_goal}</b> ({p.season_goal_progress} %)</div>}
         </div>
+        {p.status === "active" && <FinishButton p={p} onDone={load} />}
       </div>
 
       <div className="tabs-line" role="group" aria-label="Sections de la fiche">
@@ -63,6 +65,7 @@ export default function ClientDetail() {
         <div className="chat-embed"><Chat thread={p.id} className="chat" /></div>
       )}
       {tab === "routine" && <RoutineEditor p={p} onSaved={load} />}
+      {tab === "indispensables" && <PersonalEssentials p={p} onSaved={load} />}
       {tab === "seances" && <Seances p={p} />}
       {tab === "notes" && <Notes p={p} />}
       {tab === "gestion" && <Gestion p={p} onSaved={load} />}
@@ -469,7 +472,7 @@ function Gestion({ p, onSaved }: { p: Profile; onSaved: () => void }) {
           <b> Archivée</b> : plus aucun accès (ses données sont conservées).
         </div>
         <div className="pills">
-          {([["active", "Active"], ["alumni", "Ancienne cliente"], ["archived", "Archivée"]] as const).map(([k, l]) => (
+          {([["active", "Active"], ["alumni", "Programme terminé (ancienne cliente)"], ["archived", "Archivée"]] as const).map(([k, l]) => (
             <button key={k} className="pill" aria-pressed={p.status === k} onClick={() => save({ status: k }, `Statut : ${l}.`)}>{l}</button>
           ))}
         </div>
@@ -479,6 +482,47 @@ function Gestion({ p, onSaved }: { p: Profile; onSaved: () => void }) {
         <h2 className="h2">Supprimer définitivement</h2>
         <div className="small">Efface son compte, ses check-ins, débriefs, messages, photos et vocaux. Impossible à annuler.</div>
         <button className="btn btn-sm btn-danger" style={{ alignSelf: "flex-start" }} onClick={remove}><Icon name="trash" size={16} />Supprimer {p.first_name} et ses données</button>
+      </section>
+    </div>
+  );
+}
+
+/* ---------- Bouton « Programme terminé » ---------- */
+export function FinishButton({ p, onDone, small }: { p: Profile; onDone: () => void; small?: boolean }) {
+  async function finish() {
+    if (!confirm(`${p.first_name} a terminé son programme ?\n\nElle garde l'accès au groupe, à son historique et à sa routine, mais ne reçoit plus le check-in ni les messages automatiques.`)) return;
+    await supabase.from("profiles").update({ status: "alumni" }).eq("id", p.id);
+    onDone();
+  }
+  return (
+    <button className={`btn ${small ? "btn-sm btn-light" : "btn-sm btn-light"}`} onClick={finish}>
+      <Icon name="check" size={16} />Programme terminé
+    </button>
+  );
+}
+
+/* ---------- Indispensables personnels ---------- */
+function PersonalEssentials({ p, onSaved }: { p: Profile; onSaved: () => void }) {
+  const [rescue, setRescue] = useState(p.rescue_text ?? "");
+  const [msg, setMsg] = useState<string | null>(null);
+  async function save() {
+    const { error } = await supabase.from("profiles").update({ rescue_text: rescue.trim() || null }).eq("id", p.id);
+    setMsg(error ? "Pas enregistré." : "Enregistré.");
+    setTimeout(() => setMsg(null), 2000);
+    onSaved();
+  }
+  return (
+    <div className="stack-lg" style={{ maxWidth: 820 }}>
+      <section className="card card-lg stack">
+        <h2 className="h2">Sa boîte de secours personnelle</h2>
+        <div className="hint">S'affiche au-dessus de la boîte de secours commune (page Indispensables du menu). Ex. : ses phrases clés, ce qui l'apaise, son plan B.</div>
+        <textarea className="textarea" rows={6} aria-label="Boîte de secours personnelle" value={rescue} onChange={(e) => setRescue(e.target.value)} />
+        {msg && <div className="success">{msg}</div>}
+        <button className="btn btn-sm" style={{ alignSelf: "flex-start" }} onClick={save}>Enregistrer</button>
+      </section>
+      <section className="stack">
+        <h2 className="h2">Ses audios, fichiers et liens personnels</h2>
+        <ResourceManager riderId={p.id} />
       </section>
     </div>
   );
