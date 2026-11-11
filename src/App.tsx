@@ -15,6 +15,7 @@ import DebriefView from "./pages/rider/DebriefView";
 import FeedbackForm, { FeedbackView } from "./pages/rider/FeedbackForm";
 import Routine from "./pages/rider/Routine";
 import Essentials from "./pages/rider/Essentials";
+import MissionPage from "./pages/rider/MissionPage";
 import CoachEssentials from "./pages/coach/CoachEssentials";
 import Messages from "./pages/rider/Messages";
 import Progress from "./pages/rider/Progress";
@@ -114,6 +115,7 @@ export default function App() {
           <Route path="/concours/feedback/:id" element={<FeedbackView />} />
           <Route path="/routine" element={<Routine />} />
           <Route path="/indispensables" element={<Essentials />} />
+          <Route path="/mission/:id" element={<MissionPage />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/progression" element={<Progress />} />
           <Route path="/seances" element={<Sessions />} />
@@ -128,6 +130,7 @@ export default function App() {
           <Route path="inviter" element={<Invite />} />
           <Route path="messages-auto" element={<AutoMessages />} />
           <Route path="indispensables" element={<CoachEssentials />} />
+          <Route path="mission/:id" element={<MissionPage />} />
           <Route path="reglages" element={<Settings />} />
           <Route path="profil" element={<Profile />} />
         </Route>

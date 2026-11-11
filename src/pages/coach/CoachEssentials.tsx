@@ -90,7 +90,7 @@ function Missions() {
     <section className="stack">
       <div className="stack-sm">
         <h2 className="h2">Missions junior</h2>
-        <div className="hint">Environ 1 heure après la séance N (ou quand tu coches « Séance faite »), la junior reçoit ton message de fin de séance N, la mission N et son PDF. Elle les retrouve ensuite dans Indispensables, rubrique « Mes missions ».</div>
+        <div className="hint">Environ 1 heure après la séance N (ou quand tu coches « Séance faite »), la junior reçoit ton message de fin de séance N, et la mission N. Elle la retrouve ensuite dans Indispensables, rubrique « Mes missions », sous forme de fiche mise en page (qu'elle peut enregistrer en PDF). Tu n'as rien à déposer.</div>
       </div>
       {list.length === 0 && <div className="empty">Aucune mission pour l'instant.</div>}
       {list.map((m, i) => <MissionRow key={m.id} m={m} n={i + 1} onSave={save} onDelete={del} onUp={() => move(i, -1)} onPdf={(f) => attachPdf(m, f)} />)}
@@ -120,11 +120,10 @@ function MissionRow({ m, n, onSave, onDelete, onUp, onPdf }: { m: JuniorMission;
       <input id={`mt-${m.id}`} className="input" aria-label="Titre" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
       <textarea className="textarea" aria-label="Consigne" rows={5} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} />
       <div className="row wrap">
-        {m.pdf_path
-          ? <button className="btn btn-sm btn-light" onClick={async () => { const u = await signedUrl("resources", m.pdf_path!); if (u) window.open(u, "_blank"); }}>Voir le PDF</button>
-          : <span className="tag tag-rose">Pas encore de PDF</span>}
+        <a className="btn btn-sm" href={`/coach/mission/${m.id}`} target="_blank" rel="noreferrer">Voir la fiche (comme ta junior)</a>
+        {m.pdf_path && <button className="btn btn-sm btn-light" onClick={async () => { const u = await signedUrl("resources", m.pdf_path!); if (u) window.open(u, "_blank"); }}>Voir ton PDF</button>}
         <label className="btn btn-sm btn-light" style={{ cursor: "pointer" }}>
-          <Icon name="plus" size={16} />{m.pdf_path ? "Remplacer le PDF" : "Ajouter le PDF"}
+          <Icon name="plus" size={16} />{m.pdf_path ? "Remplacer ton PDF" : "Ajouter ton propre PDF (facultatif)"}
           <input type="file" accept="application/pdf" hidden onChange={(e) => { const file = e.target.files?.[0]; if (file) onPdf(file); e.target.value = ""; }} />
         </label>
       </div>

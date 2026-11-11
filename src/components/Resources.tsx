@@ -25,6 +25,7 @@ async function openFile(path: string) {
 // Affichage d'une ressource (côté cavalière et coach)
 export function ResourceCard({ r, onDelete }: { r: Resource; onDelete?: () => void }) {
   const isAudio = r.category === "audio" && r.path;
+  const isAudioUrl = r.category === "audio" && !r.path && r.url;
   return (
     <div className="card stack-sm">
       <div className="row-between">
@@ -36,7 +37,8 @@ export function ResourceCard({ r, onDelete }: { r: Resource; onDelete?: () => vo
       </div>
       {isAudio && <ResourceAudio path={r.path!} />}
       {!isAudio && r.path && <button className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }} onClick={() => openFile(r.path!)}>Ouvrir</button>}
-      {r.url && <a className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }} href={r.url} target="_blank" rel="noreferrer">Ouvrir le lien</a>}
+      {isAudioUrl && <audio controls preload="metadata" src={r.url!} style={{ width: "100%" }} />}
+      {r.url && !isAudioUrl && <a className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }} href={r.url} target="_blank" rel="noreferrer">Ouvrir le lien</a>}
     </div>
   );
 }
