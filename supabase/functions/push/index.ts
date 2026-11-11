@@ -13,6 +13,16 @@ Deno.serve(async (req) => {
     return json({ publicKey: cfg.vapid_public });
   }
 
+  // Notification de test envoyée à soi-même (bouton « Tester » dans l'appli)
+  if (body.type === "test") {
+    const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+    const { data: u } = await db.auth.getUser(token);
+    if (!u?.user) return json({ error: "Connexion requise." }, 401);
+    const { count } = await db.from("push_subscriptions").select("endpoint", { count: "exact", head: true }).eq("user_id", u.user.id);
+    const sent = await sendPush(db, [u.user.id], { title: "Évolution", body: "Test réussi : tu recevras bien les notifications sur cet appareil.", url: "/" });
+    return json({ devices: count ?? 0, sent });
+  }
+
   if (!(await checkInternal(req, db))) return json({ error: "forbidden" }, 403);
 
   // Notification directe (ex. : confirmation de séance d'une junior)
