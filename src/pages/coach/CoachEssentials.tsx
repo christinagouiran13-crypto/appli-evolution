@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { FEEDBACK_QUESTIONS } from "../../lib/text";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../lib/auth";
 import type { JuniorMission } from "../../lib/types";
@@ -38,8 +39,16 @@ export default function CoachEssentials() {
       </section>
 
       <section className="stack">
-        <h2 className="h2">Audios, questionnaire de feedback, fichiers et liens (pour toutes)</h2>
+        <h2 className="h2">Audios, fichiers et liens (pour toutes)</h2>
         <ResourceManager riderId={null} />
+      </section>
+
+      <section className="card card-lg stack">
+        <div className="row-between wrap"><h2 className="h2">Questionnaire de feedback après concours</h2><span className="tag tag-vert">✓ Déjà en ligne</span></div>
+        <div className="hint">Intégré à l'appli : tes clientes le remplissent depuis Indispensables, après un débrief ou depuis Concours. Tu reçois une carte « Feedback à lire ». Rien à ajouter.</div>
+        <ol className="small" style={{ margin: 0, paddingLeft: 20 }}>
+          {FEEDBACK_QUESTIONS.map((q) => <li key={q.key}>{q.f}</li>)}
+        </ol>
       </section>
 
       <Missions />
@@ -89,8 +98,8 @@ function Missions() {
   return (
     <section className="stack">
       <div className="stack-sm">
-        <h2 className="h2">Missions junior</h2>
-        <div className="hint">Environ 1 heure après la séance N (ou quand tu coches « Séance faite »), la junior reçoit ton message de fin de séance N, et la mission N. Elle la retrouve ensuite dans Indispensables, rubrique « Mes missions », sous forme de fiche mise en page (qu'elle peut enregistrer en PDF). Tu n'as rien à déposer.</div>
+        <div className="row-between wrap"><h2 className="h2">Missions junior</h2><span className="tag tag-vert">✓ Déjà en ligne</span></div>
+        <div className="hint">Environ 1 heure après la séance N (ou quand tu coches « Séance faite »), la junior reçoit ton message de fin de séance N, et la mission N. Elle la retrouve ensuite dans Indispensables, rubrique « Mes missions », sous forme de fiche mise en page (qu'elle peut enregistrer en PDF). Tu n'as rien à déposer : la fiche (bouton « Voir la fiche ») remplace le PDF.</div>
       </div>
       {list.length === 0 && <div className="empty">Aucune mission pour l'instant.</div>}
       {list.map((m, i) => <MissionRow key={m.id} m={m} n={i + 1} onSave={save} onDelete={del} onUp={() => move(i, -1)} onPdf={(f) => attachPdf(m, f)} />)}
@@ -123,7 +132,7 @@ function MissionRow({ m, n, onSave, onDelete, onUp, onPdf }: { m: JuniorMission;
         <a className="btn btn-sm" href={`/coach/mission/${m.id}`} target="_blank" rel="noreferrer">Voir la fiche (comme ta junior)</a>
         {m.pdf_path && <button className="btn btn-sm btn-light" onClick={async () => { const u = await signedUrl("resources", m.pdf_path!); if (u) window.open(u, "_blank"); }}>Voir ton PDF</button>}
         <label className="btn btn-sm btn-light" style={{ cursor: "pointer" }}>
-          <Icon name="plus" size={16} />{m.pdf_path ? "Remplacer ton PDF" : "Ajouter ton propre PDF (facultatif)"}
+          <Icon name="plus" size={16} />{m.pdf_path ? "Remplacer ton PDF" : "Joindre un autre PDF (facultatif, inutile)"}
           <input type="file" accept="application/pdf" hidden onChange={(e) => { const file = e.target.files?.[0]; if (file) onPdf(file); e.target.value = ""; }} />
         </label>
       </div>
