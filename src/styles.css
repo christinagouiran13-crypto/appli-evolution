@@ -255,3 +255,16 @@ hr.sep { border: none; border-top: 1px solid var(--bord); margin: 4px 0; width: 
 .card-urgent { border: 2px solid #B3261E; background: #FFF6F5; }
 .bubble video { display: block; border-radius: 12px; max-width: 260px; max-height: 340px; background: #000; }
 .rescue { background: var(--vert-eau); border-radius: 20px; padding: 18px; white-space: pre-wrap; line-height: 1.6; }
+
+/* Fiche mission junior */
+.mission-sheet { background: var(--blanc); border: 1px solid var(--bord); border-radius: 20px; padding: 22px 20px; display: flex; flex-direction: column; gap: 18px; }
+.mission-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.mission-steps li { display: flex; gap: 14px; align-items: flex-start; background: var(--creme); border-radius: 16px; padding: 14px; }
+.mission-steps .num { width: 34px; height: 34px; border-radius: 17px; background: var(--vert-fonce); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+@media print {
+  .tabbar, .no-print { display: none !important; }
+  body { background: #fff; }
+  .page { padding: 0 !important; }
+  .mission-sheet { border: none; padding: 0; }
+  .mission-steps li, .card-rose { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

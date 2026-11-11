@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
 import type { Feedback, JuniorMission, RoutineAudio } from "../../lib/types";
-import { signedUrl } from "../../lib/storage";
 import { fmtShort } from "../../lib/dates";
 import { Icon } from "../../components/Icon";
 import { SignedAudio } from "../../components/Media";
@@ -18,7 +17,6 @@ export default function Essentials() {
   const [showRescue, setShowRescue] = useState(false);
   const [myFeedback, setMyFeedback] = useState<Feedback[]>([]);
   const [missions, setMissions] = useState<JuniorMission[]>([]);
-  const [openMission, setOpenMission] = useState<string | null>(null);
 
   useEffect(() => {
     refresh();
@@ -56,18 +54,11 @@ export default function Essentials() {
           <h2 className="h2">Mes missions</h2>
           {missions.length === 0 && <div className="empty">Ta première mission arrive juste après ta première séance avec Christina.</div>}
           {missions.map((m, i) => (
-            <div key={m.id} className={i === 0 ? "card-soft stack-sm" : "card stack-sm"}>
-              <button className="card-link" style={{ border: "none", background: "none", padding: 0, textAlign: "left", font: "inherit", cursor: "pointer", width: "100%" }}
-                onClick={() => setOpenMission(openMission === m.id ? null : m.id)} aria-expanded={openMission === m.id}>
-                <div className="grow"><div className="h3">{m.title}</div>{i === 0 && <div className="small muted">Ta mission du moment</div>}</div>
-                <Icon name={openMission === m.id ? "close" : "chevron"} size={18} />
-              </button>
-              {openMission === m.id && <div style={{ whiteSpace: "pre-wrap" }}>{m.body}</div>}
-              {m.pdf_path && (
-                <button className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }}
-                  onClick={async () => { const u = await signedUrl("resources", m.pdf_path!); if (u) window.open(u, "_blank"); }}>Ouvrir le PDF</button>
-              )}
-            </div>
+            <Link key={m.id} to={`/mission/${m.id}`} className={i === 0 ? "card-soft card-link" : "card card-link"} style={{ textDecoration: "none", color: "inherit" }}>
+              <div className="icon-tile" style={i === 0 ? { background: "#fff" } : undefined}><Icon name="star" size={20} /></div>
+              <div className="grow"><div className="h3">{m.title}</div><div className="small muted">{i === 0 ? "Ta mission du moment · ouvrir la fiche" : "Ouvrir la fiche"}</div></div>
+              <Icon name="chevron" size={18} />
+            </Link>
           ))}
         </section>
       )}
