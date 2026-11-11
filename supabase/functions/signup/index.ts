@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
   });
   if (error) {
     const exists = /already|registered|exists/i.test(error.message);
-    return json({ error: exists ? "Tu as déjà un compte avec cette adresse : connecte-toi (ou utilise « Mot de passe oublié »)." : error.message }, 400);
+    return json({ error: exists ? "Tu as déjà un compte avec cette adresse : connecte-toi avec ton mot de passe. Mot de passe oublié ? Demande à Christina un lien de connexion." : error.message }, 400);
   }
   // Accord RGPD donné dans le formulaire : le compte est activé tout de suite
   await db.from("profiles").update({ consent_at: new Date().toISOString(), activated_at: new Date().toISOString() }).eq("id", data.user!.id);
