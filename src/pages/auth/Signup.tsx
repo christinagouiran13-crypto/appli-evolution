@@ -69,8 +69,9 @@ export default function Signup() {
             <button type="button" className="pill" aria-pressed={f.program === "termine"} onClick={() => setF({ ...f, program: "termine" })}>Accompagnement terminé</button>
           </div></div>
         {f.program !== "termine" && (
-          <div className="field" style={{ maxWidth: 260 }}><label htmlFor="sps">Date de début (si tu la connais)</label>
-            <input id="sps" className="input" type="date" value={f.program_start} onChange={(e) => setF({ ...f, program_start: e.target.value })} /></div>
+          <div className="field" style={{ maxWidth: 320 }}><label htmlFor="sps">Date de début de ton accompagnement (si tu la connais)</label>
+            <input id="sps" className="input" type="date" value={f.program_start} onChange={(e) => setF({ ...f, program_start: e.target.value })} />
+            <span className="hint">Pas sûre ? Laisse vide : Christina la complètera.</span></div>
         )}
 
         <label className="check"><input type="checkbox" checked={f.is_junior} onChange={(e) => setF({ ...f, is_junior: e.target.checked })} /><span>J'ai entre 10 et 12 ans (offre Junior)</span></label>

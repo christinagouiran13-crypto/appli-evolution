@@ -443,7 +443,14 @@ function Gestion({ p, onSaved }: { p: Profile; onSaved: () => void }) {
         <div className="card-rose stack-sm">
           <b>{p.first_name} a demandé la suppression de son compte.</b>
           <div className="small">Tu as un mois maximum pour la traiter. La suppression est définitive.</div>
-          <button className="btn btn-sm" style={{ alignSelf: "flex-start" }} onClick={remove}>Supprimer maintenant</button>
+          <div className="row wrap">
+            <button className="btn btn-sm btn-light" onClick={async () => {
+              await supabase.from("deletion_requests").delete().eq("rider_id", p.id);
+              setDeletion(false);
+              setMsg(`Demande annulée : le compte de ${p.first_name} est conservé.`);
+            }}>Annuler la demande (garder son compte)</button>
+            <button className="btn btn-sm btn-danger" onClick={remove}>Supprimer définitivement</button>
+          </div>
         </div>
       )}
 
