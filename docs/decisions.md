@@ -33,3 +33,4 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - **Messages automatiques** : fin de Starter 90 annoncée une semaine avant ; rappel de séance tous les 15 jours si aucune séance n'est prévue.
 - **Juniors** : quand Christina note la date de la séance N, la junior reçoit la confirmation et la mission N (liste des missions dans la page Indispensables de l'espace coach).
 - **Questionnaire de feedback après concours** : les 7 questions de Christina, dans l'appli (Indispensables, après un débrief, page Concours). Alerte « Feedback à lire » pour la coach. Le message du lendemain de concours invite au débrief et au feedback.
+- **Missions Junior 90** : les 6 missions de Christina (PDF) sont enregistrées ; les juniors ont 6 séances (Où j'en suis, Mes objectifs, Ma concentration, Ma confiance en moi, Mes émotions, Mon plan d'action). « À m'envoyer sur WhatsApp » devient « À m'envoyer dans l'appli (onglet Messages) ».
