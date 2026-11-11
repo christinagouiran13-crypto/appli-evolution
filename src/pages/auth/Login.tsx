@@ -45,7 +45,7 @@ export default function Login() {
         {info && <div className="success">{info}</div>}
         <button className="btn btn-block" disabled={busy}>{busy ? "Connexion…" : "Me connecter"}</button>
         <button type="button" className="btn btn-ghost" onClick={forgot}>Mot de passe oublié ?</button>
-        <p className="hint center">Pas encore de compte ? Christina t'envoie ton lien d'invitation après ton inscription.<br />
+        <p className="hint center">Pas encore de compte ? Utilise le lien d'inscription envoyé par Christina.<br />
           <Link to="/confidentialite">Confidentialité</Link></p>
       </form>
     </div>

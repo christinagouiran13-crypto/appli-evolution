@@ -28,6 +28,9 @@ export type Profile = {
   current_module: string | null;
   modules_done: number;
   notif_prefs: { messages: boolean; checkin: boolean; competition: boolean; session: boolean };
+  rescue_text: string | null;
+  junior_mission_index: number;
+  self_signup: boolean;
   created_at: string;
 };
 
@@ -39,6 +42,8 @@ export type Settings = {
   slots_text: string;
   thresholds: { confidence_drop: number; no_checkin_days: number; program_end_days: number; stress_high: number };
   program_weeks: { starter90: number; levelup180: number };
+  rescue_text: string;
+  signup_code: string;
 };
 
 export type Checkin = {
@@ -74,11 +79,18 @@ export type Session = {
 
 export type Message = {
   id: string; thread_rider_id: string | null; sender_id: string | null;
-  kind: "text" | "victory" | "auto"; body: string | null;
-  image_path: string | null; audio_path: string | null; audio_seconds: number | null;
+  kind: "text" | "victory" | "auto" | "urgent"; body: string | null;
+  image_path: string | null; audio_path: string | null; audio_seconds: number | null; video_path: string | null;
   pinned: boolean; created_at: string;
 };
 
 export type Member = { id: string; first_name: string; gender: "f" | "m"; role: Role; avatar_path: string | null };
 
 export type Alert = { rider_id: string; kind: string; ref_key: string; detail: string; created_at: string };
+
+export type Resource = {
+  id: string; rider_id: string | null; category: "audio" | "fichier" | "lien" | "feedback";
+  title: string; description: string | null; path: string | null; url: string | null; created_at: string;
+};
+
+export type JuniorMission = { id: string; position: number; title: string; body: string };

@@ -7,6 +7,7 @@ import { resultLabel } from "../../lib/text";
 import type { Competition, Debrief } from "../../lib/types";
 import { Icon } from "../../components/Icon";
 import { Modal } from "../../components/Modal";
+import { UrgentButton } from "../../components/UrgentButton";
 
 type CompRow = Competition & { debriefs: { id: string }[] };
 
@@ -33,7 +34,7 @@ export default function Competitions() {
 
   return (
     <div className="page">
-      <h1 className="h1">Concours</h1>
+      <div className="row-between"><h1 className="h1">Concours</h1><UrgentButton /></div>
 
       {active && (
         <div className="row wrap">

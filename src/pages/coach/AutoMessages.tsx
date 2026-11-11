@@ -11,7 +11,9 @@ const WHEN: Record<string, string> = {
   after_competition: "Le lendemain d'un concours à 10 h, si le débrief n'est pas fait.",
   no_checkin_7d: "Après 7 jours sans check-in, à 10 h (une seule fois).",
   eve_session: "La veille d'une séance, à 18 h.",
-  end_starter: "Le jour de la fin de Starter 90, à 10 h.",
+  end_starter: "Une semaine avant la fin de Starter 90, à 10 h.",
+  session_reminder: "Tous les 15 jours à 10 h, seulement si aucune séance n'est prévue (sauf juniors).",
+  junior_mission: "Juniors : tous les 15 jours à 10 h, avec la mission suivante de ta liste (page Indispensables).",
 };
 
 export default function AutoMessages() {
@@ -32,7 +34,7 @@ export default function AutoMessages() {
         <h1 className="h1">Messages automatiques</h1>
         <p className="muted" style={{ margin: 0 }}>
           Écris-les une fois avec tes mots : l'appli les envoie à ta place, dans la conversation privée de chaque cliente, avec une notification.
-          Tu peux utiliser <b>{"{prenom}"}</b> (son prénom), <b>{"{cavaliere}"}</b> (cavalière ou cavalier), et pour la veille de séance <b>{"{heure}"}</b> et <b>{"{lien}"}</b>.
+          Tu peux utiliser <b>{"{prenom}"}</b> (son prénom), <b>{"{cavaliere}"}</b> (cavalière ou cavalier), pour la veille de séance <b>{"{heure}"}</b> et <b>{"{lien}"}</b>, et pour les juniors <b>{"{mission}"}</b>.
         </p>
       </div>
       {saved && <div className="success">{saved}</div>}

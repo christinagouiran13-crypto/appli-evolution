@@ -167,14 +167,28 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 6. Fin de Starter 90 (à partir de 10 h, le jour de la fin et la semaine suivante)
+  // 6. Une semaine avant la fin de Starter 90 (à partir de 10 h)
   if (hour >= 10) {
     for (const r of riders) {
       if (r.program !== "starter90" || !r.program_start) continue;
       const end = addDays(r.program_start, (weeks.starter90 ?? 12) * 7);
-      if (today >= end && today <= addDays(end, 7)) {
-        await deliver(ctx, r, "end_starter", "end_starter", r.program_start, "session", "/");
+      if (today >= addDays(end, -7) && today <= end) {
+        await deliver(ctx, r, "end_starter", "end_starter", r.program_start, "session", "/seances");
       }
+    }
+  }
+
+  // 6 bis. Tous les 15 jours : rappel de séance si aucune séance n'est prévue (à partir de 10 h)
+  if (hour >= 10) {
+    const { data: upcoming } = await db.from("sessions").select("rider_id")
+      .eq("done", false).gte("scheduled_at", now.toISOString());
+    const booked = new Set((upcoming ?? []).map((s) => s.rider_id));
+    for (const r of riders) {
+      if (booked.has(r.id)) continue;
+      const since = parisNow(new Date(r.activated_at!)).date;
+      const days = Math.round((new Date(today + "T12:00:00Z").getTime() - new Date(since + "T12:00:00Z").getTime()) / 86400000);
+      if (days < 15) continue;
+      await deliver(ctx, r, "session_reminder", "session_reminder", String(Math.floor(days / 15)), "session", "/seances");
     }
   }
 

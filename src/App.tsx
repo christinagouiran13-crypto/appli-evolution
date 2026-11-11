@@ -5,6 +5,7 @@ import { TabBar } from "./components/TabBar";
 import Login from "./pages/auth/Login";
 import Welcome from "./pages/auth/Welcome";
 import Privacy from "./pages/auth/Privacy";
+import Signup from "./pages/auth/Signup";
 import Home from "./pages/rider/Home";
 import CheckIn from "./pages/rider/CheckIn";
 import Goals from "./pages/rider/Goals";
@@ -12,6 +13,8 @@ import Competitions from "./pages/rider/Competitions";
 import DebriefForm from "./pages/rider/DebriefForm";
 import DebriefView from "./pages/rider/DebriefView";
 import Routine from "./pages/rider/Routine";
+import Essentials from "./pages/rider/Essentials";
+import CoachEssentials from "./pages/coach/CoachEssentials";
 import Messages from "./pages/rider/Messages";
 import Progress from "./pages/rider/Progress";
 import Sessions from "./pages/rider/Sessions";
@@ -96,6 +99,7 @@ export default function App() {
       <Route path="/bienvenue" element={<WelcomeGate />} />
       <Route element={<PublicOnly />}>
         <Route path="/connexion" element={<Login />} />
+        <Route path="/inscription" element={<Signup />} />
       </Route>
       <Route element={<Protected />}>
         <Route element={<RiderShell />}>
@@ -106,6 +110,7 @@ export default function App() {
           <Route path="/concours/debrief" element={<DebriefForm />} />
           <Route path="/concours/debrief/:id" element={<DebriefView />} />
           <Route path="/routine" element={<Routine />} />
+          <Route path="/indispensables" element={<Essentials />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/progression" element={<Progress />} />
           <Route path="/seances" element={<Sessions />} />
@@ -119,6 +124,7 @@ export default function App() {
           <Route path="messages" element={<CoachMessages />} />
           <Route path="inviter" element={<Invite />} />
           <Route path="messages-auto" element={<AutoMessages />} />
+          <Route path="indispensables" element={<CoachEssentials />} />
           <Route path="reglages" element={<Settings />} />
           <Route path="profil" element={<Profile />} />
         </Route>

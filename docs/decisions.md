@@ -22,3 +22,13 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - **Hébergement de l'appli** : GitHub Pages (compte GitHub déjà existant), à l'adresse app.evolution-coaching.fr. Aucune donnée de cliente n'y est stockée : elles restent toutes chez Supabase, en Europe.
 - Coût de départ : 0 €. Plus tard : formule Supabase payante (environ 25 $/mois) pour les sauvegardes quotidiennes automatiques, dès que de vraies clientes utilisent l'appli.
 - Adresse de l'appli : **app.evolution-coaching.fr** (le domaine de Christina chez OVH s'écrit avec un tiret).
+
+## Version 1.1 (11 novembre 2026)
+
+- **Programme terminé** : bouton dans la fiche cliente (et sur l'alerte de fin de programme). La cliente devient « ancienne cliente » : elle garde le groupe, son historique et sa routine, sans check-in ni messages automatiques.
+- **Inscription autonome** : un lien unique à partager (WhatsApp, e-mail groupé). Chaque cliente crée son compte avec l'e-mail de Systemio et choisit son programme (ou « accompagnement terminé »). Alerte « Nouvelle inscription » pour vérifier la fiche. Le lien peut être changé à tout moment.
+- **Onglet « Indispensables »** (remplace l'onglet Routine) : bouton Urgence, boîte de secours (partie commune + partie personnelle), routine construite par la cavalière (la coach peut aussi la modifier), audios de préparation mentale, questionnaire de feedback (contenu à fournir par Christina), fichiers et liens.
+- **Bouton Urgence** : message marqué URGENCE dans la conversation privée, notification prioritaire pour Christina, carte rouge en tête du tableau de bord. Ensuite, la cavalière voit sa boîte de secours.
+- **Vidéos** dans la messagerie (50 Mo maximum par vidéo avec l'offre gratuite de Supabase).
+- **Messages automatiques** : fin de Starter 90 annoncée une semaine avant ; rappel de séance tous les 15 jours si aucune séance n'est prévue.
+- **Juniors** : quand Christina note la date de la séance N, la junior reçoit la confirmation et la mission N (liste des missions dans la page Indispensables de l'espace coach).

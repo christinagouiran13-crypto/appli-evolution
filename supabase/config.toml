@@ -433,3 +433,6 @@ verify_jwt = false
 
 [functions.coach-admin]
 verify_jwt = false
+
+[functions.signup]
+verify_jwt = false

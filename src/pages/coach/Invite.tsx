@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { callFunction } from "../../lib/supabase";
+import { callFunction, supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
 import { PROGRAM_LABEL, g } from "../../lib/text";
 import { todayISO } from "../../lib/dates";
@@ -38,6 +38,42 @@ const EMPTY = {
   program_start: todayISO(), is_junior: false, parent_name: "", parent_email: "", parent_consent: false,
 };
 
+// Un seul lien à partager (groupe WhatsApp, e-mail groupé…) : chaque cliente s'inscrit seule
+function SignupLink() {
+  const { settings, refresh } = useMe();
+  const [copied, setCopied] = useState<string | null>(null);
+  if (!settings) return null;
+  const link = `${location.origin}/inscription?code=${settings.signup_code}`;
+  const text = `Coucou ! 🐴 L'appli Évolution est prête : notre suivi, la messagerie et le groupe passent maintenant par là (fini WhatsApp).\n\n1. Ouvre ce lien sur ton téléphone (dans Safari sur iPhone) :\n${link}\n2. Crée ton compte avec la même adresse e-mail que sur ta plateforme de formation.\n3. Ajoute l'appli sur ton écran d'accueil : bouton Partager puis « Sur l'écran d'accueil » (iPhone) ou menu ⋮ puis « Installer l'application » (Android).\n4. Active les notifications dans ton profil.\n\nÀ tout de suite dans l'appli !\nChristina`;
+  const copy = async (v: string, what: string) => {
+    await navigator.clipboard.writeText(v);
+    setCopied(what);
+    setTimeout(() => setCopied(null), 2000);
+  };
+  const regenerate = async () => {
+    if (!confirm("Créer un nouveau lien ? L'ancien ne marchera plus (les comptes déjà créés ne changent pas).")) return;
+    const code = Array.from(crypto.getRandomValues(new Uint8Array(9))).map((b) => b.toString(16).padStart(2, "0")).join("");
+    await supabase.from("app_settings").update({ signup_code: code }).eq("id", true);
+    refresh();
+  };
+  return (
+    <div className="card card-lg stack">
+      <h2 className="h2">Lien d'inscription pour toutes tes clientes</h2>
+      <div className="small">
+        Partage ce lien une seule fois, par exemple dans ton groupe WhatsApp ou par e-mail groupé. Chaque cliente crée son compte toute seule
+        et choisit son programme. Tu reçois une alerte « Nouvelle inscription » pour vérifier sa fiche.
+      </div>
+      <input className="input" readOnly value={link} aria-label="Lien d'inscription" onFocus={(e) => e.target.select()} />
+      <div className="row wrap">
+        <button className="btn btn-sm" onClick={() => copy(text, "msg")}><Icon name="copy" size={16} />{copied === "msg" ? "Message copié !" : "Copier le message prêt à envoyer"}</button>
+        <button className="btn btn-sm btn-light" onClick={() => copy(link, "link")}><Icon name="copy" size={16} />{copied === "link" ? "Copié !" : "Copier le lien seul"}</button>
+        {"share" in navigator && <button className="btn btn-sm btn-light" onClick={() => navigator.share({ text })}><Icon name="share" size={16} />Partager</button>}
+      </div>
+      <button className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={regenerate}>Le lien a circulé trop loin ? Créer un nouveau lien</button>
+    </div>
+  );
+}
+
 export default function Invite() {
   useMe();
   const [f, setF] = useState(EMPTY);
@@ -63,8 +99,12 @@ export default function Invite() {
   return (
     <div className="stack-lg" style={{ maxWidth: 680 }}>
       <div className="stack-sm">
-        <h1 className="h1">Inviter une cliente</h1>
-        <p className="muted" style={{ margin: 0 }}>Après la vente, crée son accès ici. Utilise la même adresse e-mail que sur Systemio.</p>
+        <h1 className="h1">Inviter des clientes</h1>
+      </div>
+      <SignupLink />
+      <div className="stack-sm">
+        <h2 className="h2">Ou inviter une cliente précise</h2>
+        <p className="muted small" style={{ margin: 0 }}>Utile pour une nouvelle vente : tu choisis toi-même son programme. Même adresse e-mail que sur Systemio.</p>
       </div>
       {result && <InviteLink link={result.link} firstName={result.first_name} email={result.email} />}
       <form className="card card-lg stack" onSubmit={submit}>

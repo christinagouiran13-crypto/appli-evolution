@@ -4,6 +4,9 @@ import { useMe } from "../../lib/auth";
 import type { Phase, Routine as R, RoutineAudio } from "../../lib/types";
 import { SignedAudio } from "../../components/Media";
 import { Celebration } from "../../components/Celebration";
+import { Icon } from "../../components/Icon";
+import { BackHeader } from "../../components/BackHeader";
+import { newId } from "../../lib/storage";
 
 export const PHASES: { key: Phase; label: string }[] = [
   { key: "avant", label: "Avant" },
@@ -17,6 +20,8 @@ export default function Routine() {
   const [audios, setAudios] = useState<RoutineAudio[]>([]);
   const [phase, setPhase] = useState<Phase>("avant");
   const [celebrate, setCelebrate] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
   const readOnly = me.status !== "active";
 
   useEffect(() => {
@@ -45,12 +50,38 @@ export default function Routine() {
 
   const done = steps.filter((s) => r.checked.includes(s.id)).length;
 
+  async function saveSteps(next: R["steps"]) {
+    if (!r) return;
+    setR({ ...r, steps: next });
+    await supabase.from("routines").update({ steps: next }).eq("rider_id", me.id);
+  }
+  const addStep = () => {
+    if (!draft.trim() || !r) return;
+    saveSteps({ ...r.steps, [phase]: [...steps, { id: newId(), text: draft.trim() }] });
+    setDraft("");
+  };
+  const delStep = (id: string) => r && saveSteps({ ...r.steps, [phase]: steps.filter((x) => x.id !== id) });
+  const editStep = (id: string, text: string) => r && setR({ ...r, steps: { ...r.steps, [phase]: steps.map((x) => (x.id === id ? { ...x, text } : x)) } });
+  const moveStep = (i: number, d: number) => {
+    if (!r) return;
+    const a = [...steps]; const j = i + d;
+    if (j < 0 || j >= a.length) return;
+    [a[i], a[j]] = [a[j], a[i]];
+    saveSteps({ ...r.steps, [phase]: a });
+  };
+
   return (
     <div className="page">
+      <BackHeader to="/indispensables" label="Mes indispensables" />
       <div className="stack-sm">
         <h1 className="h1">Ma routine</h1>
-        <p className="muted" style={{ margin: 0 }}>Écrite avec Christina. Coche chaque étape le jour du concours.</p>
+        <p className="muted" style={{ margin: 0 }}>Construis-la avec Christina, puis coche chaque étape le jour du concours.</p>
       </div>
+      {!readOnly && (
+        <button className={`btn btn-sm ${editing ? "" : "btn-light"}`} style={{ alignSelf: "flex-start" }} onClick={() => setEditing(!editing)}>
+          <Icon name={editing ? "check" : "edit"} size={16} />{editing ? "J'ai fini de modifier" : "Modifier ma routine"}
+        </button>
+      )}
 
       {me.anchor_word && (
         <div className="card-soft stack-sm center">
@@ -65,8 +96,23 @@ export default function Routine() {
         ))}
       </div>
 
-      {steps.length === 0 ? (
-        <div className="empty">Christina prépare cette partie de ta routine avec toi pendant vos séances.</div>
+      {editing ? (
+        <div className="stack-sm">
+          {steps.map((s, i) => (
+            <div key={s.id} className="row" style={{ gap: 4 }}>
+              <input className="input grow" aria-label={`Étape ${i + 1}`} value={s.text} onChange={(e) => editStep(s.id, e.target.value)} onBlur={() => r && saveSteps(r.steps)} />
+              <button className="icon-btn" style={{ width: 38, height: 38 }} aria-label="Monter l'étape" onClick={() => moveStep(i, -1)}>↑</button>
+              <button className="icon-btn" style={{ width: 38, height: 38 }} aria-label="Supprimer l'étape" onClick={() => delStep(s.id)}><Icon name="close" size={14} /></button>
+            </div>
+          ))}
+          <div className="row">
+            <input className="input grow" aria-label="Nouvelle étape" placeholder="Nouvelle étape (ex. : 3 respirations au paddock)" value={draft}
+              onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addStep())} />
+            <button className="icon-btn solid" aria-label="Ajouter l'étape" onClick={addStep}><Icon name="plus" size={18} /></button>
+          </div>
+        </div>
+      ) : steps.length === 0 ? (
+        <div className="empty">Pas encore d'étape ici. Touche « Modifier ma routine » pour la construire, ou prépare-la avec Christina en séance.</div>
       ) : (
         <div className="stack-sm">
           <div className="small muted">{done} sur {steps.length} étapes</div>
@@ -79,7 +125,7 @@ export default function Routine() {
         </div>
       )}
 
-      {!readOnly && r.checked.length > 0 && (
+      {!readOnly && !editing && r.checked.length > 0 && (
         <button className="btn btn-light btn-sm" style={{ alignSelf: "flex-start" }} onClick={reset}>Tout décocher pour le prochain concours</button>
       )}
 
