@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
-import type { RoutineAudio } from "../../lib/types";
+import type { Feedback, RoutineAudio } from "../../lib/types";
+import { fmtShort } from "../../lib/dates";
 import { Icon } from "../../components/Icon";
 import { SignedAudio } from "../../components/Media";
 import { ResourceCard, useResources } from "../../components/Resources";
@@ -14,9 +15,11 @@ export default function Essentials() {
   const { list } = useResources("mine");
   const [audios, setAudios] = useState<RoutineAudio[]>([]);
   const [showRescue, setShowRescue] = useState(false);
+  const [myFeedback, setMyFeedback] = useState<Feedback[]>([]);
 
   useEffect(() => {
     refresh();
+    supabase.from("competition_feedback").select("*").eq("rider_id", me.id).order("date", { ascending: false }).then(({ data }) => setMyFeedback((data as Feedback[]) ?? []));
     supabase.from("routine_audios").select("*").eq("rider_id", me.id).order("created_at").then(({ data }) => setAudios((data as RoutineAudio[]) ?? []));
   }, [me.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -61,9 +64,20 @@ export default function Essentials() {
 
       <section className="stack">
         <h2 className="h2">Questionnaire de feedback</h2>
-        {feedback.length === 0
-          ? <div className="empty">Bientôt disponible : Christina prépare ton questionnaire de feedback.</div>
-          : feedback.map((r) => <ResourceCard key={r.id} r={r} />)}
+        {me.status === "active" && (
+          <Link to="/concours/feedback" className="card card-link">
+            <div className="icon-tile"><Icon name="edit" size={20} /></div>
+            <div className="grow"><div className="h3">Remplir mon feedback après concours</div><div className="small muted">7 questions pour faire le point avec Christina</div></div>
+            <Icon name="chevron" size={18} />
+          </Link>
+        )}
+        {myFeedback.map((f) => (
+          <Link key={f.id} to={`/concours/feedback/${f.id}`} className="card card-link">
+            <div className="grow"><div className="h3">{f.title || "Concours"}</div><div className="small muted">{fmtShort(f.date)}</div></div>
+            {f.coach_read_at ? <span className="tag tag-vert">Lu par Christina</span> : <Icon name="chevron" size={18} />}
+          </Link>
+        ))}
+        {feedback.map((r) => <ResourceCard key={r.id} r={r} />)}
       </section>
 
       {files.length > 0 && (

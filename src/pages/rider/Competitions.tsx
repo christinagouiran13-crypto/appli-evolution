@@ -53,6 +53,7 @@ export default function Competitions() {
               <span className="tag tag-rose">À faire</span>
             </Link>
           ))}
+          <Link to="/concours/feedback" className="small" style={{ alignSelf: "flex-start" }}>Remplir le questionnaire de feedback</Link>
         </section>
       )}
 

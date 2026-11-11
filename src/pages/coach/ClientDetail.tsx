@@ -5,10 +5,11 @@ import { useMe } from "../../lib/auth";
 import { addDays, fmtDate, fmtDateTime, fmtShort, programProgress, relativeDay } from "../../lib/dates";
 import { BADGES, PROGRAM_LABEL, STARTER_SESSIONS, badgeName } from "../../lib/text";
 import { newId, upload } from "../../lib/storage";
-import type { Checkin, Debrief, Phase, Profile, Routine, RoutineAudio, Session, WeeklyGoals } from "../../lib/types";
+import type { Checkin, Debrief, Feedback, Phase, Profile, Routine, RoutineAudio, Session, WeeklyGoals } from "../../lib/types";
 import { Avatar } from "../../components/Avatar";
 import { Chat } from "../../components/Chat";
 import { DebriefDetails } from "../../components/DebriefDetails";
+import { FeedbackDetails } from "../../components/FeedbackDetails";
 import { Icon } from "../../components/Icon";
 import { LineChart } from "../../components/LineChart";
 import { SignedAudio } from "../../components/Media";
@@ -17,7 +18,7 @@ import { InviteLink } from "./Invite";
 import { ResourceManager } from "../../components/Resources";
 
 const TABS = [
-  ["suivi", "Suivi"], ["debriefs", "Débriefs"], ["objectifs", "Objectifs"], ["messages", "Messages"],
+  ["suivi", "Suivi"], ["debriefs", "Débriefs et feedbacks"], ["objectifs", "Objectifs"], ["messages", "Messages"],
   ["routine", "Routine"], ["indispensables", "Indispensables"], ["seances", "Séances"], ["notes", "Notes privées"], ["gestion", "Gestion"],
 ] as const;
 
@@ -120,9 +121,15 @@ function Suivi({ p }: { p: Profile }) {
 function Debriefs({ p }: { p: Profile }) {
   const nav = useNavigate();
   const [list, setList] = useState<Debrief[]>([]);
+  const [fbs, setFbs] = useState<Feedback[]>([]);
   const load = useCallback(() => {
     supabase.from("debriefs").select("*").eq("rider_id", p.id).order("date", { ascending: false }).then(({ data }) => setList((data as Debrief[]) ?? []));
+    supabase.from("competition_feedback").select("*").eq("rider_id", p.id).order("date", { ascending: false }).then(({ data }) => setFbs((data as Feedback[]) ?? []));
   }, [p.id]);
+  const markFbRead = async (f: Feedback) => {
+    await supabase.from("competition_feedback").update({ coach_read_at: new Date().toISOString() }).eq("id", f.id);
+    load();
+  };
   useEffect(load, [load]);
   const markRead = async (d: Debrief) => {
     await supabase.from("debriefs").update({ coach_read_at: new Date().toISOString() }).eq("id", d.id);
@@ -130,6 +137,15 @@ function Debriefs({ p }: { p: Profile }) {
   };
   return (
     <div className="stack">
+      {fbs.map((f) => (
+        <div key={f.id} className="card card-lg stack">
+          <FeedbackDetails f={f} p={p} />
+          <div className="row wrap">
+            {!f.coach_read_at && <button className="btn btn-sm" onClick={() => markFbRead(f)}>Marquer comme lu</button>}
+            <button className="btn btn-sm btn-light" onClick={async () => { if (!f.coach_read_at) await markFbRead(f); nav(`/coach/cliente/${p.id}?onglet=messages`); }}>Lui répondre</button>
+          </div>
+        </div>
+      ))}
       {list.length === 0 && <div className="empty">Aucun débrief pour l'instant.</div>}
       {list.map((d) => (
         <div key={d.id} className="card card-lg stack">

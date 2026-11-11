@@ -12,6 +12,7 @@ import { FinishButton } from "./ClientDetail";
 const ACTION: Record<string, { label: string; tab: string }> = {
   urgent: { label: "Lui répondre maintenant", tab: "messages" },
   new_signup: { label: "Vérifier sa fiche", tab: "gestion" },
+  feedback_unread: { label: "Lire le feedback", tab: "debriefs" },
   confidence_drop: { label: "Lui écrire", tab: "messages" },
   stress_high: { label: "Lui écrire", tab: "messages" },
   dropout: { label: "La relancer", tab: "messages" },
@@ -33,6 +34,7 @@ export default function Dashboard() {
   async function dismiss(a: Alert) {
     await supabase.from("alert_dismissals").insert({ rider_id: a.rider_id, kind: a.kind, ref_key: a.ref_key });
     if (a.kind === "debrief_unread") await supabase.from("debriefs").update({ coach_read_at: new Date().toISOString() }).eq("id", a.ref_key);
+    if (a.kind === "feedback_unread") await supabase.from("competition_feedback").update({ coach_read_at: new Date().toISOString() }).eq("id", a.ref_key);
     if (a.kind === "appointment") await supabase.from("appointment_requests").update({ status: "done" }).eq("id", a.ref_key);
     reload();
   }

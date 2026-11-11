@@ -12,6 +12,7 @@ import Goals from "./pages/rider/Goals";
 import Competitions from "./pages/rider/Competitions";
 import DebriefForm from "./pages/rider/DebriefForm";
 import DebriefView from "./pages/rider/DebriefView";
+import FeedbackForm, { FeedbackView } from "./pages/rider/FeedbackForm";
 import Routine from "./pages/rider/Routine";
 import Essentials from "./pages/rider/Essentials";
 import CoachEssentials from "./pages/coach/CoachEssentials";
@@ -109,6 +110,8 @@ export default function App() {
           <Route path="/concours" element={<Competitions />} />
           <Route path="/concours/debrief" element={<DebriefForm />} />
           <Route path="/concours/debrief/:id" element={<DebriefView />} />
+          <Route path="/concours/feedback" element={<FeedbackForm />} />
+          <Route path="/concours/feedback/:id" element={<FeedbackView />} />
           <Route path="/routine" element={<Routine />} />
           <Route path="/indispensables" element={<Essentials />} />
           <Route path="/messages" element={<Messages />} />
