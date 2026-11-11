@@ -75,6 +75,7 @@ export type RoutineAudio = { id: string; rider_id: string; title: string; path: 
 export type Session = {
   id: string; rider_id: string; number: number | null; theme: string;
   scheduled_at: string | null; visio_url: string | null; prep: string | null; done: boolean;
+  booked_at: string | null;
 };
 
 export type Message = {

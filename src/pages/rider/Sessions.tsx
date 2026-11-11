@@ -1,33 +1,29 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
 import { fmtDateTime } from "../../lib/dates";
 import type { Session } from "../../lib/types";
 import { BackHeader } from "../../components/BackHeader";
 import { Icon } from "../../components/Icon";
+import { BookingModal } from "../../components/BookingModal";
 
 export default function Sessions() {
   const { me, settings } = useMe();
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [requested, setRequested] = useState(false);
 
-  useEffect(() => {
+  const [booking, setBooking] = useState(false);
+  const load = useCallback(() => {
     supabase.from("sessions").select("*").eq("rider_id", me.id).order("number").order("scheduled_at").then(({ data }) => setSessions((data as Session[]) ?? []));
-    supabase.from("appointment_requests").select("id").eq("rider_id", me.id).eq("status", "pending").then(({ data }) => setRequested((data ?? []).length > 0));
   }, [me.id]);
+  useEffect(load, [load]);
 
   const now = new Date().toISOString();
   const upcoming = sessions.filter((s) => !s.done && s.scheduled_at && s.scheduled_at >= now);
-  const toBook = sessions.filter((s) => !s.done && !s.scheduled_at);
+  const booked = sessions.filter((s) => !s.done && !s.scheduled_at && s.booked_at);
+  const toBook = sessions.filter((s) => !s.done && !s.scheduled_at && !s.booked_at);
   const past = sessions.filter((s) => s.done || (s.scheduled_at && s.scheduled_at < now));
 
-  async function book() {
-    window.open(settings?.calendly_url, "_blank", "noopener");
-    if (!requested) {
-      await supabase.from("appointment_requests").insert({ note: toBook[0] ? `Séance ${toBook[0].number ?? ""} ${toBook[0].theme}`.trim() : null });
-      setRequested(true);
-    }
-  }
+  const book = () => setBooking(true);
 
   return (
     <div className="page">
@@ -40,9 +36,8 @@ export default function Sessions() {
       {me.status === "active" && (
         <div className="card-soft stack">
           <div className="h3">Prendre rendez-vous</div>
-          <div className="small">Choisis ton créneau directement dans l'agenda de Christina. Tu reçois la confirmation par e-mail.</div>
+          <div className="small">Choisis ton créneau dans l'agenda de Christina, directement ici. Ta séance s'ajoute toute seule{me.is_junior ? ", et ta mission arrive dans tes messages" : ""}.</div>
           <button className="btn" style={{ alignSelf: "flex-start" }} onClick={book}><Icon name="calendar" size={18} />Réserver ma séance</button>
-          {requested && <div className="small muted">Christina est prévenue de ta demande. Ta séance apparaîtra ici dès qu'elle l'aura notée.</div>}
         </div>
       )}
 
@@ -60,6 +55,14 @@ export default function Sessions() {
           </div>
         ))}
       </section>
+
+      {booked.map((s) => (
+        <div key={s.id} className="card row">
+          <div className="grow"><div className="h3">{s.number ? `Séance ${s.number} · ` : ""}{s.theme}</div>
+            <div className="small muted">Réservée : la date est dans ton e-mail de confirmation.</div></div>
+          <span className="tag tag-vert">Réservée</span>
+        </div>
+      ))}
 
       {toBook.length > 0 && (
         <section className="stack">
@@ -86,6 +89,7 @@ export default function Sessions() {
           ))}
         </section>
       )}
+      {booking && <BookingModal onClose={() => setBooking(false)} onBooked={load} />}
     </div>
   );
 }
