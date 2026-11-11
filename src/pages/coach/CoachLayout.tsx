@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import logo from "../../components/logo-vert.svg";
+import { CoachPushBanner } from "../../components/CoachPushBanner";
 
 export default function CoachLayout() {
   const links = [
@@ -12,6 +13,7 @@ export default function CoachLayout() {
   ];
   return (
     <div className="coach">
+      <CoachPushBanner />
       <nav className="coach-nav" aria-label="Espace coach">
         <div className="coach-nav-inner">
           <img src={logo} alt="Évolution" width={34} height={25} style={{ marginRight: 6 }} />

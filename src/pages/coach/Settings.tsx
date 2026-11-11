@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { callFunction, supabase } from "../../lib/supabase";
 import { useAuth } from "../../lib/auth";
 import type { Settings as S } from "../../lib/types";
 import { currentPushState, enablePush } from "../../lib/push";
@@ -26,7 +26,17 @@ export default function Settings() {
 
       <section className="card card-lg stack">
         <h2 className="h2">Notifications sur cet appareil</h2>
-        {push === "on" ? <div className="success">Activées : tu es prévenue des messages de tes clientes.</div> : (
+        {push === "on" ? (
+          <>
+            <div className="success">Activées sur cet appareil : tu es prévenue des messages et des urgences.</div>
+            <button className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }} onClick={async () => {
+              try {
+                const r = await callFunction<{ devices: number; sent: number }>("push", { type: "test" });
+                setMsg(r.sent > 0 ? `Notification de test envoyée (${r.sent} appareil${r.sent > 1 ? "s" : ""}). Tu dois la voir dans quelques secondes.` : "Aucune notification n'a pu partir. Désactive puis réactive les notifications sur ce téléphone, ou préviens Claude.");
+              } catch (e) { setMsg((e as Error).message); }
+            }}>M'envoyer une notification de test</button>
+          </>
+        ) : (
           <button className="btn btn-sm" style={{ alignSelf: "flex-start" }} onClick={async () => {
             try { await enablePush(); setPush("on"); } catch (e) { setMsg((e as Error).message); }
           }}><Icon name="bell" size={16} />Activer les notifications</button>
