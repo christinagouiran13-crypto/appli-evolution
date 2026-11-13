@@ -4,6 +4,7 @@ import { compressImage, newId, upload } from "../lib/storage";
 import { fmtDate, fmtTime, todayISO } from "../lib/dates";
 import type { Member, Message } from "../lib/types";
 import { useAuth } from "../lib/auth";
+import { refreshAppBadge } from "../lib/badge";
 import { Icon } from "./Icon";
 import { Avatar } from "./Avatar";
 import { SignedAudio, SignedImage, SignedVideo } from "./Media";
@@ -16,6 +17,7 @@ export function threadKey(thread: string | null) {
 
 export async function markRead(thread: string | null) {
   await supabase.from("read_state").upsert({ thread: threadKey(thread), last_read_at: new Date().toISOString() });
+  refreshAppBadge();
 }
 
 let directoryCache: Map<string, Member> | null = null;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 import { useAuth } from "./auth";
+import { refreshAppBadge } from "./badge";
 
 // Nombre de messages non lus (groupe + conversation privée) pour la cavalière
 export async function countUnread(userId: string) {
@@ -23,7 +24,7 @@ export function useUnread(active = true) {
   useEffect(() => {
     if (!userId || !active) return;
     let alive = true;
-    const refresh = () => countUnread(userId).then((v) => alive && setN(v));
+    const refresh = () => { refreshAppBadge(); return countUnread(userId).then((v) => alive && setN(v)); };
     refresh();
     const ch = supabase.channel(`unread-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => setTimeout(refresh, 400))

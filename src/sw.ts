@@ -13,8 +13,13 @@ precacheAndRoute(self.__WB_MANIFEST);
 registerRoute(new NavigationRoute(createHandlerBoundToURL("index.html")));
 
 self.addEventListener("push", (event) => {
-  let data: { title?: string; body?: string; url?: string; tag?: string; urgent?: boolean } = {};
+  let data: { title?: string; body?: string; url?: string; tag?: string; urgent?: boolean; badge?: number } = {};
   try { data = event.data?.json() ?? {}; } catch { data = { body: event.data?.text() }; }
+  // Pastille sur l'icône de l'appli (iPhone et Android)
+  const nav = self.navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
+  if (typeof data.badge === "number" && nav.setAppBadge) {
+    (data.badge > 0 ? nav.setAppBadge(data.badge) : nav.clearAppBadge?.())?.catch(() => undefined);
+  }
   event.waitUntil(
     self.registration.showNotification(data.title ?? "Évolution", {
       body: data.body ?? "",
