@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import type { Profile, Settings } from "./types";
+import { refreshAppBadge } from "./badge";
 
 type AuthState = {
   loading: boolean;
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ]);
     setProfile(p as Profile | null);
     setSettings(st as Settings | null);
+    refreshAppBadge();
   }, []);
 
   useEffect(() => {
@@ -65,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     settings,
     refresh: () => load(session),
     signOut: async () => {
+      await (navigator as Navigator & { clearAppBadge?: () => Promise<void> }).clearAppBadge?.().catch(() => undefined);
       await supabase.auth.signOut();
       setProfile(null);
     },

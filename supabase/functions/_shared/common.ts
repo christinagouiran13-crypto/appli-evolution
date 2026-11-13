@@ -58,7 +58,7 @@ export async function checkInternal(req: Request, db: SupabaseClient) {
   return req.headers.get("x-internal-secret") === cfg.internal_secret;
 }
 
-export type PushPayload = { title: string; body: string; url?: string; tag?: string; urgent?: boolean };
+export type PushPayload = { title: string; body: string; url?: string; tag?: string; urgent?: boolean; badge?: number };
 
 // Envoie une notification à un ou plusieurs comptes. Les abonnements
 // expirés sont supprimés.
@@ -67,12 +67,18 @@ export async function sendPush(db: SupabaseClient, userIds: string[], payload: P
   const cfg = await getConfig(db);
   webpush.setVapidDetails(cfg.vapid_subject, cfg.vapid_public!, cfg.vapid_private!);
   const { data: subs } = await db.from("push_subscriptions").select("*").in("user_id", userIds);
+  // Pastille de l'icône : nombre de messages non lus de chaque destinataire
+  const badges = new Map<string, number>();
+  await Promise.all([...new Set((subs ?? []).map((s) => s.user_id as string))].map(async (uid) => {
+    const { data } = await db.rpc("unread_count", { uid });
+    badges.set(uid, typeof data === "number" ? data : 0);
+  }));
   let sent = 0;
   await Promise.all((subs ?? []).map(async (s) => {
     try {
       await webpush.sendNotification(
         { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-        JSON.stringify(payload),
+        JSON.stringify({ ...payload, badge: badges.get(s.user_id) ?? payload.badge }),
         { TTL: 60 * 60 * 24 },
       );
       sent++;
