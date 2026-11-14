@@ -39,3 +39,4 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - **Fiches mission** : l'appli met en page chaque mission comme les PDF de Christina (avec « À m'envoyer dans l'appli »), à ouvrir dans « Mes missions » et à enregistrer en PDF. Aucun PDF à déposer.
 - **Audio de préparation mentale** de Christina ajouté pour toutes les clientes (Indispensables). Fichier publié avec l'appli : accessible à quiconque connaît son adresse.
 - **Pastille sur l'icône** : nombre de messages non lus (groupe + conversation privée ; pour la coach, toutes les conversations), mis à jour à chaque notification et à l'ouverture des messages. iPhone (appli sur l'écran d'accueil, notifications autorisées) et Android.
+- **Vocaux en accéléré** : lecteur audio avec vitesse 1×, 1,5×, 2× (comme WhatsApp), retenue d'une écoute à l'autre, sur les vocaux et les audios de préparation.

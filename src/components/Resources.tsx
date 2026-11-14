@@ -4,6 +4,7 @@ import { newId, signedUrl, upload } from "../lib/storage";
 import type { Resource } from "../lib/types";
 import { Icon } from "./Icon";
 import { useSigned } from "./Media";
+import { AudioPlayer } from "./AudioPlayer";
 
 const CATEGORY_LABEL: Record<Resource["category"], string> = {
   audio: "Audio de préparation mentale",
@@ -14,7 +15,7 @@ const CATEGORY_LABEL: Record<Resource["category"], string> = {
 
 function ResourceAudio({ path }: { path: string }) {
   const url = useSigned("resources", path);
-  return url ? <audio controls preload="metadata" src={url} style={{ width: "100%" }} /> : <div className="small muted">Chargement…</div>;
+  return url ? <AudioPlayer src={url} /> : <div className="small muted">Chargement…</div>;
 }
 
 async function openFile(path: string) {
@@ -37,7 +38,7 @@ export function ResourceCard({ r, onDelete }: { r: Resource; onDelete?: () => vo
       </div>
       {isAudio && <ResourceAudio path={r.path!} />}
       {!isAudio && r.path && <button className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }} onClick={() => openFile(r.path!)}>Ouvrir</button>}
-      {isAudioUrl && <audio controls preload="metadata" src={r.url!} style={{ width: "100%" }} />}
+      {isAudioUrl && <AudioPlayer src={r.url!} />}
       {r.url && !isAudioUrl && <a className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }} href={r.url} target="_blank" rel="noreferrer">Ouvrir le lien</a>}
     </div>
   );
