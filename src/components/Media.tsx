@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { signedUrl } from "../lib/storage";
+import { AudioPlayer } from "./AudioPlayer";
 
 export function useSigned(bucket: string, path: string | null | undefined) {
   const [url, setUrl] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export function SignedImage({ path, alt = "Photo" }: { path: string; alt?: strin
 export function SignedAudio({ bucket = "chat", path }: { bucket?: string; path: string }) {
   const url = useSigned(bucket, path);
   if (!url) return <div className="small muted">Chargement de l'audio…</div>;
-  return <audio controls preload="metadata" src={url} />;
+  return <AudioPlayer src={url} compact={bucket === "chat"} />;
 }
 
 export function SignedVideo({ path }: { path: string }) {

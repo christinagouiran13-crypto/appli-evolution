@@ -39,10 +39,10 @@ export default function ClientDetail() {
 
   return (
     <>
-      <div className="row" style={{ gap: 16 }}>
+      <div className="row wrap" style={{ gap: 16 }}>
         <Link to="/coach" className="icon-btn" aria-label="Retour au tableau de bord"><Icon name="back" size={20} /></Link>
         <Avatar path={p.avatar_path} name={p.first_name} size={56} />
-        <div className="grow">
+        <div className="grow" style={{ minWidth: 200 }}>
           <h1 className="h1">{p.first_name} {p.last_name}</h1>
           <div className="muted small">
             {p.program ? PROGRAM_LABEL[p.program] : ""}{prog ? ` · ${prog.label}` : ""}
