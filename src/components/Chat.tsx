@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { ensureRealtimeAuth, supabase } from "../lib/supabase";
 import { compressImage, newId, upload } from "../lib/storage";
 import { fmtDate, fmtTime, todayISO } from "../lib/dates";
 import type { Member, Message } from "../lib/types";
@@ -10,6 +10,8 @@ import { Avatar } from "./Avatar";
 import { SignedAudio, SignedImage, SignedVideo } from "./Media";
 
 const PAGE = 150;
+const EMOJIS = ["❤️", "👍", "😂", "😮", "😢", "🙏", "👏", "💪"];
+type Reaction = { message_id: string; user_id: string; emoji: string };
 
 export function threadKey(thread: string | null) {
   return thread ?? "group";
@@ -91,6 +93,32 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [reactions, setReactions] = useState<Map<string, Reaction[]>>(new Map());
+
+  const loadReactions = useCallback(async (ids: string[]) => {
+    if (ids.length === 0) return;
+    const { data } = await supabase.from("message_reactions").select("message_id, user_id, emoji").in("message_id", ids);
+    setReactions((prev) => {
+      const next = new Map(prev);
+      ids.forEach((id) => next.delete(id));
+      for (const r of (data as Reaction[]) ?? []) next.set(r.message_id, [...(next.get(r.message_id) ?? []), r]);
+      return next;
+    });
+  }, []);
+
+  async function react(m: Message, emoji: string) {
+    if (!me) return;
+    const mineR = reactions.get(m.id)?.find((r) => r.user_id === me.id);
+    setReactions((prev) => {
+      const next = new Map(prev);
+      const others = (next.get(m.id) ?? []).filter((r) => r.user_id !== me.id);
+      next.set(m.id, mineR?.emoji === emoji ? others : [...others, { message_id: m.id, user_id: me.id, emoji }]);
+      return next;
+    });
+    setSelected(null);
+    if (mineR?.emoji === emoji) await supabase.from("message_reactions").delete().eq("message_id", m.id).eq("user_id", me.id);
+    else await supabase.from("message_reactions").upsert({ message_id: m.id, user_id: me.id, emoji }, { onConflict: "message_id,user_id" });
+  }
   const bodyRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const photoCamRef = useRef<HTMLInputElement>(null);
@@ -113,10 +141,13 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
       setDir(d);
       setMsgs(((data as Message[]) ?? []).reverse());
       setLoading(false);
+      loadReactions(((data as Message[]) ?? []).map((m) => m.id));
       markRead(thread);
     })();
 
-    const channel = supabase
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    ensureRealtimeAuth().then(() => { if (alive) channel = subscribe(); });
+    const subscribe = () => supabase
       .channel(`chat-${threadKey(thread)}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, async (payload) => {
         if (payload.eventType === "DELETE") {
@@ -138,6 +169,10 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
         });
         markRead(thread);
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_reactions" }, (payload) => {
+        const r = (payload.eventType === "DELETE" ? payload.old : payload.new) as Partial<Reaction>;
+        if (r.message_id) loadReactions([r.message_id]);
+      })
       .subscribe((status) => { if (status === "SUBSCRIBED") catchUp(); });
 
     // Filet de sécurité : si un message temps réel se perd (réseau mobile), on rattrape
@@ -147,6 +182,7 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
       const { data } = await q;
       if (!alive || !data) return;
       const fresh = (data as Message[]).reverse();
+      loadReactions(fresh.map((m) => m.id));
       setMsgs((prev) => {
         if (prev.length === 0) return fresh;
         const ids = new Set(prev.map((m) => m.id));
@@ -160,11 +196,11 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
     const poll = window.setInterval(catchUp, 20000);
     return () => {
       alive = false;
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", onVisible);
       window.clearInterval(poll);
     };
-  }, [thread, belongs]);
+  }, [thread, belongs, loadReactions]);
 
   useLayoutEffect(() => {
     const el = bodyRef.current;
@@ -283,6 +319,10 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
           const d = dayKey(m.created_at);
           const sep = d !== lastDay ? (lastDay = d, true) : false;
           const canAct = isCoach || mine;
+          const rs = reactions.get(m.id) ?? [];
+          const groups = EMOJIS.concat(rs.map((r) => r.emoji).filter((e) => !EMOJIS.includes(e)))
+            .map((e) => ({ e, n: rs.filter((r) => r.emoji === e).length, mine: rs.some((r) => r.emoji === e && r.user_id === me?.id) }))
+            .filter((g) => g.n > 0);
           return (
             <div key={m.id} style={{ display: "contents" }}>
               {sep && <div className="day-sep">{d === todayISO() ? "Aujourd'hui" : fmtDate(m.created_at, { weekday: "long", day: "numeric", month: "long" })}</div>}
@@ -295,7 +335,10 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
                 )}
                 <div
                   className={`bubble ${m.kind === "victory" ? "victory" : ""} ${m.kind === "urgent" ? "urgent" : ""}`}
-                  onClick={() => canAct && setSelected(selected === m.id ? null : m.id)}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest("button, a, input, video, audio")) return;
+                    setSelected(selected === m.id ? null : m.id);
+                  }}
                 >
                   {m.kind === "victory" && <div className="tiny bold" style={{ marginBottom: 4 }}>🏆 Victoire partagée</div>}
                   {m.kind === "urgent" && <div className="tiny bold" style={{ marginBottom: 4 }}>🚨 URGENCE</div>}
@@ -304,12 +347,30 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
                   {m.audio_path && <SignedAudio path={m.audio_path} />}
                   {m.body && <div style={{ marginTop: m.image_path || m.video_path ? 6 : 0 }}>{m.body}</div>}
                 </div>
+                {groups.length > 0 && (
+                  <div className="reactions">
+                    {groups.map((g) => (
+                      <button key={g.e} className={`reaction ${g.mine ? "mine" : ""}`} onClick={() => react(m, g.e)}
+                        aria-label={`${g.e} ${g.n}${g.mine ? ", ta réaction : toucher pour la retirer" : ""}`}>
+                        {g.e}{g.n > 1 && <span>{g.n}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="when">
                   {fmtTime(m.created_at)}
                   {isCoach && m.kind === "auto" && " · message automatique"}
                   {m.pinned && " · épinglé"}
                 </div>
                 {selected === m.id && (
+                  <div className="reaction-bar" role="group" aria-label="Réagir">
+                    {EMOJIS.map((e) => (
+                      <button key={e} onClick={() => react(m, e)} aria-label={`Réagir ${e}`}
+                        className={rs.some((r) => r.user_id === me?.id && r.emoji === e) ? "on" : ""}>{e}</button>
+                    ))}
+                  </div>
+                )}
+                {selected === m.id && canAct && (
                   <div className="row" style={{ gap: 6 }}>
                     {isCoach && thread === null && (
                       <button className="btn btn-sm btn-light" onClick={() => togglePin(m)}>
