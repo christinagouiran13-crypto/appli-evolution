@@ -40,3 +40,4 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - **Audio de préparation mentale** de Christina ajouté pour toutes les clientes (Indispensables). Fichier publié avec l'appli : accessible à quiconque connaît son adresse.
 - **Pastille sur l'icône** : nombre de messages non lus (groupe + conversation privée ; pour la coach, toutes les conversations), mis à jour à chaque notification et à l'ouverture des messages. iPhone (appli sur l'écran d'accueil, notifications autorisées) et Android.
 - **Vocaux en accéléré** : lecteur audio avec vitesse 1×, 1,5×, 2× (comme WhatsApp), retenue d'une écoute à l'autre, sur les vocaux et les audios de préparation.
+- **Photos et vidéos** : bouton « + » dans toutes les conversations (groupe et privé) : galerie, prendre une photo, filmer une vidéo. Vidéos jusqu'à 50 Mo avec l'offre gratuite de Supabase.
