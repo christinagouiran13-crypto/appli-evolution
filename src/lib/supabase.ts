@@ -20,3 +20,10 @@ export async function callFunction<T = unknown>(name: string, body: Record<strin
   }
   return data as T;
 }
+
+// Donne au temps réel le jeton de la personne connectée avant de s'abonner
+// (sinon les règles de sécurité peuvent bloquer les mises à jour en direct)
+export async function ensureRealtimeAuth() {
+  const { data } = await supabase.auth.getSession();
+  if (data.session) await supabase.realtime.setAuth(data.session.access_token);
+}
