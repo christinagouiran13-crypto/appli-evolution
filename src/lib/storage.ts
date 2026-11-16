@@ -15,7 +15,7 @@ export async function signedUrl(bucket: string, path: string) {
 export async function upload(bucket: string, path: string, file: Blob, contentType?: string) {
   const { error } = await supabase.storage.from(bucket).upload(path, file, {
     contentType: contentType ?? file.type,
-    upsert: true,
+    upsert: false,
   });
   if (error) throw error;
   cache.delete(`${bucket}/${path}`);

@@ -93,6 +93,9 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
   const [selected, setSelected] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const photoCamRef = useRef<HTMLInputElement>(null);
+  const videoCamRef = useRef<HTMLInputElement>(null);
+  const [attachOpen, setAttachOpen] = useState(false);
   const atBottom = useRef(true);
   const recorder = useRecorder();
 
@@ -205,13 +208,14 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
       await upload("chat", path, file, file.type || "video/mp4");
       await insert({ video_path: path, body: text.trim() || null });
       setText("");
-    } catch {
-      setError("La vidéo n'a pas pu être envoyée. Vérifie ta connexion (le Wi-Fi est conseillé).");
+    } catch (e) {
+      setError(`La vidéo n'a pas pu être envoyée. Vérifie ta connexion (le Wi-Fi est conseillé). (${(e as Error).message ?? "erreur"})`);
     } finally { setBusy(false); }
   }
 
   async function sendPhoto(file: File) {
-    if (file.type.startsWith("video/")) return sendVideo(file);
+    setAttachOpen(false);
+    if (file.type.startsWith("video/") || /\.(mov|mp4|m4v|webm|3gp|avi)$/i.test(file.name)) return sendVideo(file);
     setBusy(true); setError(null);
     try {
       const blob = await compressImage(file);
@@ -219,8 +223,8 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
       await upload("chat", path, blob, "image/jpeg");
       await insert({ image_path: path, body: text.trim() || null });
       setText("");
-    } catch {
-      setError("La photo n'a pas pu être envoyée.");
+    } catch (e) {
+      setError(`La photo n'a pas pu être envoyée. (${(e as Error).message ?? "erreur"})`);
     } finally { setBusy(false); }
   }
 
@@ -326,15 +330,31 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
         <div className="chat-foot"><div className="hint" style={{ padding: 8 }}>{readOnlyText ?? "Cette conversation est en lecture seule."}</div></div>
       ) : (
         <div className="chat-foot">
-          <input ref={fileRef} type="file" accept="image/*,video/*" hidden onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) sendPhoto(f);
-            e.target.value = "";
-          }} />
+          {[
+            { ref: fileRef, accept: "image/*,video/*", capture: undefined },
+            { ref: photoCamRef, accept: "image/*", capture: "environment" },
+            { ref: videoCamRef, accept: "video/*", capture: "environment" },
+          ].map((x, i) => (
+            <input key={i} ref={x.ref} type="file" accept={x.accept} capture={x.capture as "environment" | undefined} hidden onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) sendPhoto(f);
+              e.target.value = "";
+            }} />
+          ))}
           {!recorder.recording && (
-            <button className="icon-btn" aria-label="Envoyer une photo ou une vidéo" onClick={() => fileRef.current?.click()} disabled={busy}>
-              <Icon name="image" size={20} />
-            </button>
+            <div style={{ position: "relative" }}>
+              <button className={`icon-btn ${attachOpen ? "solid" : ""}`} aria-label="Envoyer une photo ou une vidéo" aria-expanded={attachOpen}
+                onClick={() => setAttachOpen(!attachOpen)} disabled={busy}>
+                <Icon name={attachOpen ? "close" : "plus"} size={20} stroke={2} />
+              </button>
+              {attachOpen && (
+                <div className="attach-menu" role="menu">
+                  <button role="menuitem" onClick={() => fileRef.current?.click()}><Icon name="image" size={20} />Photo ou vidéo (galerie)</button>
+                  <button role="menuitem" onClick={() => photoCamRef.current?.click()}><Icon name="image" size={20} />Prendre une photo</button>
+                  <button role="menuitem" onClick={() => videoCamRef.current?.click()}><Icon name="play" size={20} />Filmer une vidéo</button>
+                </div>
+              )}
+            </div>
           )}
           {recorder.recording ? (
             <div className="grow row" style={{ minHeight: 44, padding: "0 12px" }}>
