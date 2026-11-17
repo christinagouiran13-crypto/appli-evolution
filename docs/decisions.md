@@ -43,3 +43,4 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - **Photos et vidéos** : bouton « + » dans toutes les conversations (groupe et privé) : galerie, prendre une photo, filmer une vidéo. Vidéos jusqu'à 50 Mo avec l'offre gratuite de Supabase.
 - **Réactions emoji** : toucher un message pour réagir (❤️ 👍 😂 😮 😢 🙏 👏 💪), une réaction par personne, visible en direct par tous ceux qui voient le message.
 - **Messagerie coach** : deux onglets « Équipe Évolution » (groupe) et « One-to-one » (privés : liste triée, non lus en premier, recherche par prénom, conversation en plein écran sur téléphone). Côté cavalières, l'onglet « Groupe » devient « Équipe Évolution ».
+- **Accompagnement terminé** : dès que la date de fin (Starter 90 ou Level Up 180) est dépassée, plus aucun message automatique ni alerte « décrochage », même si le statut n'a pas encore été passé à « Programme terminé ». Évolution Club n'a pas de fin.
