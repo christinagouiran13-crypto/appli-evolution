@@ -106,7 +106,11 @@ Deno.serve(async (req) => {
   const { data: riderRows } = await db.from("profiles")
     .select("id, first_name, gender, program, program_start, created_at, activated_at, notif_prefs")
     .eq("role", "rider").eq("status", "active").not("activated_at", "is", null);
-  const riders = (riderRows ?? []) as Rider[];
+  // Accompagnement terminé (date de fin dépassée) : plus aucun message automatique
+  const ended = (r: Rider) =>
+    (r.program === "starter90" || r.program === "levelup180") && !!r.program_start &&
+    today > addDays(r.program_start, (weeks[r.program] ?? (r.program === "starter90" ? 12 : 26)) * 7);
+  const riders = ((riderRows ?? []) as Rider[]).filter((r) => !ended(r));
   const byId = new Map(riders.map((r) => [r.id, r]));
 
   // 1. Message du mardi (à partir de 9 h), deux versions en alternance
