@@ -14,7 +14,7 @@ export default function Messages() {
       <h1 className="h1">Messages</h1>
       <div className="segmented" role="group" aria-label="Conversation">
         <button aria-pressed={tab === "groupe"} onClick={() => setParams({ fil: "groupe" })}>
-          Groupe{unread.group > 0 && tab !== "groupe" ? ` (${unread.group})` : ""}
+          Équipe Évolution{unread.group > 0 && tab !== "groupe" ? ` (${unread.group})` : ""}
         </button>
         <button aria-pressed={tab === "coach"} onClick={() => setParams({ fil: "coach" })}>
           Christina{unread.coach > 0 && tab !== "coach" ? ` (${unread.coach})` : ""}
@@ -22,7 +22,7 @@ export default function Messages() {
       </div>
       <div className="small muted">
         {tab === "groupe"
-          ? "Groupe Évolution · toutes les cavalières et cavaliers accompagnés"
+          ? "Équipe Évolution · toutes les cavalières et cavaliers accompagnés"
           : `Conversation privée avec Christina · ${settings?.response_time_text ?? ""}`}
       </div>
     </div>

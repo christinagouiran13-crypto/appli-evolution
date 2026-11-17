@@ -42,3 +42,4 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - **Vocaux en accéléré** : lecteur audio avec vitesse 1×, 1,5×, 2× (comme WhatsApp), retenue d'une écoute à l'autre, sur les vocaux et les audios de préparation.
 - **Photos et vidéos** : bouton « + » dans toutes les conversations (groupe et privé) : galerie, prendre une photo, filmer une vidéo. Vidéos jusqu'à 50 Mo avec l'offre gratuite de Supabase.
 - **Réactions emoji** : toucher un message pour réagir (❤️ 👍 😂 😮 😢 🙏 👏 💪), une réaction par personne, visible en direct par tous ceux qui voient le message.
+- **Messagerie coach** : deux onglets « Équipe Évolution » (groupe) et « One-to-one » (privés : liste triée, non lus en premier, recherche par prénom, conversation en plein écran sur téléphone). Côté cavalières, l'onglet « Groupe » devient « Équipe Évolution ».

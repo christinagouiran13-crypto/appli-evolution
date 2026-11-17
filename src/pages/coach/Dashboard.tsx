@@ -81,7 +81,7 @@ export default function Dashboard() {
                 <div className="small" style={{ color: "#3D524B" }}>{a.detail}</div>
                 <div className="tiny muted">{relativeDay(a.created_at)}</div>
                 <div className="row wrap">
-                  <button className="btn btn-sm" onClick={() => nav(`/coach/cliente/${a.rider_id}?onglet=${act.tab}`)}>{act.label}</button>
+                  <button className="btn btn-sm" onClick={() => nav(act.tab === "messages" ? `/coach/messages?onglet=prive&cliente=${a.rider_id}` : `/coach/cliente/${a.rider_id}?onglet=${act.tab}`)}>{act.label}</button>
                   {a.kind === "program_end" && r && <FinishButton p={r} onDone={reload} small />}
                   {a.kind === "deletion" && <button className="btn btn-sm btn-light" onClick={async () => { await supabase.from("deletion_requests").delete().eq("id", a.ref_key); reload(); }}>Annuler la demande</button>}
                   {a.kind !== "deletion" && <button className="btn btn-sm btn-light" onClick={() => dismiss(a)}>C'est fait</button>}
