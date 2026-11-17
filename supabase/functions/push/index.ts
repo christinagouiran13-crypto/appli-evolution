@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       recipients = data ?? [];
       title = m.kind === "victory"
         ? `Victoire de ${sender?.first_name ?? ""} 🎉`
-        : `Groupe Évolution · ${sender?.first_name ?? ""}`;
+        : `Équipe Évolution · ${sender?.first_name ?? ""}`;
       url = "/messages?fil=groupe";
     } else if (sender?.role === "coach") {
       const { data } = await db.from("profiles").select("id, notif_prefs").eq("id", m.thread_rider_id);
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
       title = m.kind === "urgent"
         ? `🚨 URGENCE · ${sender?.first_name ?? "une cliente"}`
         : `Message de ${sender?.first_name ?? "une cliente"}`;
-      url = `/coach/cliente/${m.thread_rider_id}?onglet=messages`;
+      url = `/coach/messages?onglet=prive&cliente=${m.thread_rider_id}`;
     }
 
     const urgent = m.kind === "urgent";

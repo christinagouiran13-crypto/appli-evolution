@@ -293,3 +293,20 @@ hr.sep { border: none; border-top: 1px solid var(--bord); margin: 4px 0; width: 
 .reaction { display: inline-flex; align-items: center; gap: 3px; height: 28px; padding: 0 8px; border-radius: 14px; border: 1px solid var(--bord); background: var(--blanc); font-size: 15px; cursor: pointer; }
 .reaction span { font-size: 12px; font-weight: 700; color: var(--texte-doux); }
 .reaction.mine { background: var(--vert-eau); border-color: var(--vert); }
+
+/* Messagerie coach : Équipe Évolution / One-to-one */
+.count-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 6px; border-radius: 10px; background: #D9534F; color: #fff; font-size: 12px; font-weight: 700; }
+.thread-list { display: flex; flex-direction: column; background: var(--blanc); border: 1px solid var(--bord); border-radius: 18px; overflow: hidden; }
+.thread { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: none; border-bottom: 1px solid #EEF4F1; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; width: 100%; }
+.thread:last-child { border-bottom: none; }
+.thread.active { background: var(--vert-eau); }
+.thread-name { font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.thread.unread .thread-name { font-weight: 800; }
+.thread-preview { font-size: 13px; color: var(--texte-doux); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thread.unread .thread-preview { color: var(--vert-fonce); font-weight: 600; }
+.dot-green { width: 9px; height: 9px; border-radius: 5px; background: #2E9E6B; display: inline-block; flex-shrink: 0; }
+.chat-title { padding: 10px 14px; border-bottom: 1px solid var(--bord); font-weight: 600; }
+.coach .coach-chat { height: calc(100dvh - 210px); min-height: 420px; }
+.msg-wide { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.msg-wide .coach-chat { height: calc(100dvh - 190px); }
+@media (max-width: 899px) { .coach .coach-chat { height: calc(100dvh - 120px); } }
