@@ -20,6 +20,7 @@ import CoachEssentials from "./pages/coach/CoachEssentials";
 import Messages from "./pages/rider/Messages";
 import Progress from "./pages/rider/Progress";
 import Sessions from "./pages/rider/Sessions";
+import Formation from "./pages/rider/Formation";
 import Profile from "./pages/rider/Profile";
 import CoachLayout from "./pages/coach/CoachLayout";
 import Dashboard from "./pages/coach/Dashboard";
@@ -119,6 +120,7 @@ export default function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/progression" element={<Progress />} />
           <Route path="/seances" element={<Sessions />} />
+          <Route path="/formation" element={<Formation />} />
           <Route path="/profil" element={<Profile />} />
         </Route>
       </Route>
