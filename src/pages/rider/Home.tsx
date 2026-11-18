@@ -55,6 +55,8 @@ export default function Home() {
   }, [me.id]);
 
   const prog = programProgress(me, settings);
+  // Bilan disponible dans les 2 dernières semaines du programme, et après
+  const bilanReady = !me.is_junior && (me.status === "alumni" || (!!prog && todayISO() >= addDays(prog.end, -14)));
   const streak = d ? computeStreak(d.weeks) : null;
 
   return (
@@ -125,6 +127,14 @@ export default function Home() {
             </a>
           ) : null}
         </div>
+      )}
+
+      {bilanReady && (
+        <Link to="/bilan" className="card-rose card-link" style={{ textDecoration: "none", color: "inherit" }}>
+          <div className="icon-tile" style={{ background: "#fff", color: "var(--rose-texte)" }}><Icon name="trophy" size={20} /></div>
+          <div className="grow"><div className="h3">Ton bilan est prêt 🎉</div><div className="small muted">Regarde tout le chemin parcouru</div></div>
+          <Icon name="chevron" size={18} />
+        </Link>
       )}
 
       {me.status === "alumni" && (

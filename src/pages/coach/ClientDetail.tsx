@@ -100,6 +100,7 @@ function Suivi({ p }: { p: Profile }) {
           {BADGES.filter((b) => badges.includes(b.code)).map((b) => <span key={b.code} className="tag tag-vert">{badgeName(b, p)}</span>)}
         </div>
         <TrainingSummary p={p} />
+        <Link className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }} to={`/coach/bilan/${p.id}`}><Icon name="trophy" size={16} />Voir son bilan</Link>
       </div>
       <div className="stack">
         <h2 className="h2">Ses check-ins</h2>

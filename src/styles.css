@@ -318,3 +318,15 @@ hr.sep { border: none; border-top: 1px solid var(--bord); margin: 4px 0; width: 
 .parcours-dot { width: 28px; height: 28px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background: var(--blanc); border: 2px solid var(--bord-fort); color: var(--texte-doux); margin-top: 12px; z-index: 1; }
 .parcours-step.current .parcours-dot { background: var(--vert-fonce); border-color: var(--vert-fonce); color: #fff; }
 .parcours-step.done .parcours-dot { background: var(--vert); border-color: var(--vert); color: #fff; }
+
+/* Réponses types */
+.quick-menu { left: -56px; min-width: 290px; max-width: min(320px, calc(100vw - 32px)); max-height: 60vh; overflow-y: auto; }
+
+/* Mur des victoires */
+.victory-card { background: #FFF8E6; border: 1px solid #F0DDA0; border-radius: 20px; padding: 16px; }
+.victory-text { font-size: 17px; line-height: 1.5; white-space: pre-wrap; }
+.victory-photo img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 14px; display: block; }
+
+/* Bilan de fin de programme */
+.bilan-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 700px) { .bilan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

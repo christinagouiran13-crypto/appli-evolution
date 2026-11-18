@@ -124,6 +124,25 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
   const photoCamRef = useRef<HTMLInputElement>(null);
   const videoCamRef = useRef<HTMLInputElement>(null);
   const [attachOpen, setAttachOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quick, setQuick] = useState<{ id: string; title: string; body: string }[] | null>(null);
+
+  async function openQuick() {
+    setAttachOpen(false);
+    if (quickOpen) { setQuickOpen(false); return; }
+    setQuickOpen(true);
+    if (!quick) {
+      const { data } = await supabase.from("quick_replies").select("id, title, body").order("position").order("created_at");
+      setQuick(data ?? []);
+    }
+  }
+  function insertQuick(body: string) {
+    const prenom = thread ? dir.get(thread)?.first_name ?? "" : "";
+    const filled = body.replaceAll("{prenom}", prenom).replace(/\s+([!?,.])/g, " $1").replace(/ {2,}/g, " ").trim();
+    setText((t) => (t.trim() ? `${t.trim()}\n${filled}` : filled));
+    setQuickOpen(false);
+    setTimeout(() => document.getElementById(`msg-${threadKey(thread)}`)?.focus(), 50);
+  }
   const atBottom = useRef(true);
   const recorder = useRecorder();
 
@@ -405,7 +424,7 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
           {!recorder.recording && (
             <div style={{ position: "relative" }}>
               <button className={`icon-btn ${attachOpen ? "solid" : ""}`} aria-label="Envoyer une photo ou une vidéo" aria-expanded={attachOpen}
-                onClick={() => setAttachOpen(!attachOpen)} disabled={busy}>
+                onClick={() => { setQuickOpen(false); setAttachOpen(!attachOpen); }} disabled={busy}>
                 <Icon name={attachOpen ? "close" : "plus"} size={20} stroke={2} />
               </button>
               {attachOpen && (
@@ -413,6 +432,26 @@ export function Chat({ thread, readOnly, readOnlyText, header, className }: Prop
                   <button role="menuitem" onClick={() => fileRef.current?.click()}><Icon name="image" size={20} />Photo ou vidéo (galerie)</button>
                   <button role="menuitem" onClick={() => photoCamRef.current?.click()}><Icon name="image" size={20} />Prendre une photo</button>
                   <button role="menuitem" onClick={() => videoCamRef.current?.click()}><Icon name="play" size={20} />Filmer une vidéo</button>
+                </div>
+              )}
+            </div>
+          )}
+          {!recorder.recording && isCoach && (
+            <div style={{ position: "relative" }}>
+              <button className={`icon-btn ${quickOpen ? "solid" : ""}`} aria-label="Réponses types" aria-expanded={quickOpen} onClick={openQuick}>
+                <span aria-hidden="true" style={{ fontSize: 18 }}>⚡</span>
+              </button>
+              {quickOpen && (
+                <div className="attach-menu quick-menu" role="menu">
+                  <div className="tiny muted" style={{ padding: "6px 12px" }}>Réponses types · touche pour l'insérer, puis retouche si besoin</div>
+                  {quick === null && <div className="small muted" style={{ padding: 12 }}>Chargement…</div>}
+                  {quick?.length === 0 && <div className="small muted" style={{ padding: 12 }}>Aucune réponse type. Ajoute-les dans « Messages automatiques ».</div>}
+                  {quick?.map((q) => (
+                    <button key={q.id} role="menuitem" onClick={() => insertQuick(q.body)} style={{ flexDirection: "column", alignItems: "flex-start", gap: 2, padding: "10px 12px" }}>
+                      <span>{q.title}</span>
+                      <span className="tiny muted" style={{ fontWeight: 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 260 }}>{q.body}</span>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

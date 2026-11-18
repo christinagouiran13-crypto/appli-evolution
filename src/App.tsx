@@ -21,6 +21,8 @@ import Messages from "./pages/rider/Messages";
 import Progress from "./pages/rider/Progress";
 import Sessions from "./pages/rider/Sessions";
 import Formation from "./pages/rider/Formation";
+import Victories from "./pages/rider/Victories";
+import BilanPage from "./pages/rider/BilanPage";
 import Profile from "./pages/rider/Profile";
 import CoachLayout from "./pages/coach/CoachLayout";
 import Dashboard from "./pages/coach/Dashboard";
@@ -121,6 +123,8 @@ export default function App() {
           <Route path="/progression" element={<Progress />} />
           <Route path="/seances" element={<Sessions />} />
           <Route path="/formation" element={<Formation />} />
+          <Route path="/victoires" element={<Victories />} />
+          <Route path="/bilan" element={<BilanPage />} />
           <Route path="/profil" element={<Profile />} />
         </Route>
       </Route>
@@ -133,6 +137,8 @@ export default function App() {
           <Route path="messages-auto" element={<AutoMessages />} />
           <Route path="indispensables" element={<CoachEssentials />} />
           <Route path="mission/:id" element={<MissionPage />} />
+          <Route path="victoires" element={<Victories />} />
+          <Route path="bilan/:id" element={<BilanPage />} />
           <Route path="reglages" element={<Settings />} />
           <Route path="profil" element={<Profile />} />
         </Route>

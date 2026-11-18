@@ -88,6 +88,7 @@ export default function Progress() {
       {me.status === "active" && (
         <div className="stack">
           <button className="btn btn-block" onClick={() => setShare(true)}><Icon name="trophy" size={20} />Partager une victoire au groupe</button>
+          <Link className="btn btn-light btn-block" to="/victoires">🏆 Voir le mur des victoires</Link>
           <Link className="btn btn-light btn-block" to="/formation"><Icon name="play" size={20} />Ma formation</Link>
         </div>
       )}
