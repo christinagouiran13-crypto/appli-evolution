@@ -116,7 +116,7 @@ export default function CoachMessages() {
 
   const groupChat = (
     <div className="chat-embed coach-chat">
-      <div className="chat-title">Équipe Évolution · touche un message pour réagir ou l'épingler</div>
+      <div className="chat-title row-between wrap"><span>Équipe Évolution · touche un message pour réagir ou l'épingler</span><a className="btn btn-sm btn-light" href="/coach/victoires">🏆 Mur des victoires</a></div>
       <Chat key="group" thread={null} className="chat" />
     </div>
   );

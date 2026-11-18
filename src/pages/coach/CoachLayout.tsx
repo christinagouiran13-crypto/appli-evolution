@@ -8,7 +8,7 @@ export default function CoachLayout() {
     { to: "/coach/messages", label: "Messages" },
     { to: "/coach/inviter", label: "Inviter une cliente" },
     { to: "/coach/indispensables", label: "Indispensables" },
-    { to: "/coach/messages-auto", label: "Messages automatiques" },
+    { to: "/coach/messages-auto", label: "Messages auto et réponses types" },
     { to: "/coach/reglages", label: "Réglages" },
   ];
   return (

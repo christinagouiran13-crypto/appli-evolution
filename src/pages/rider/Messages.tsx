@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useMe } from "../../lib/auth";
 import { useUnread } from "../../lib/unread";
 import { Chat } from "../../components/Chat";
@@ -20,6 +20,7 @@ export default function Messages() {
           Christina{unread.coach > 0 && tab !== "coach" ? ` (${unread.coach})` : ""}
         </button>
       </div>
+      {tab === "groupe" && <Link to="/victoires" className="btn btn-sm btn-light" style={{ alignSelf: "flex-start" }}>🏆 Mur des victoires</Link>}
       <div className="small muted">
         {tab === "groupe"
           ? "Équipe Évolution · toutes les cavalières et cavaliers accompagnés"

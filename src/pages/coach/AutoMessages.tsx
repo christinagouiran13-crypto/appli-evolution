@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { QuickRepliesAdmin } from "../../components/QuickRepliesAdmin";
 
 type Tpl = { code: string; label: string; body: string; enabled: boolean; sort: number };
 
@@ -49,6 +50,7 @@ export default function AutoMessages() {
           <button className="btn btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => save(t)}>Enregistrer</button>
         </div>
       ))}
+      <QuickRepliesAdmin />
     </div>
   );
 }
