@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../lib/auth";
 import type { JuniorMission } from "../../lib/types";
 import { ResourceManager } from "../../components/Resources";
+import { TrainingAdmin } from "../../components/TrainingAdmin";
 import { Icon } from "../../components/Icon";
 import { newId, signedUrl, upload } from "../../lib/storage";
 
@@ -50,6 +51,8 @@ export default function CoachEssentials() {
           {FEEDBACK_QUESTIONS.map((q) => <li key={q.key}>{q.f}</li>)}
         </ol>
       </section>
+
+      <TrainingAdmin />
 
       <Missions />
     </div>

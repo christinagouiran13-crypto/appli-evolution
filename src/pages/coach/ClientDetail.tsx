@@ -16,6 +16,7 @@ import { SignedAudio } from "../../components/Media";
 import { PHASES } from "../rider/Routine";
 import { InviteLink } from "./Invite";
 import { ResourceManager } from "../../components/Resources";
+import { useTraining } from "../../lib/training";
 
 const TABS = [
   ["suivi", "Suivi"], ["debriefs", "Débriefs et feedbacks"], ["objectifs", "Objectifs"], ["messages", "Messages"],
@@ -98,6 +99,7 @@ function Suivi({ p }: { p: Profile }) {
         <div className="row wrap">
           {BADGES.filter((b) => badges.includes(b.code)).map((b) => <span key={b.code} className="tag tag-vert">{badgeName(b, p)}</span>)}
         </div>
+        <TrainingSummary p={p} />
       </div>
       <div className="stack">
         <h2 className="h2">Ses check-ins</h2>
@@ -547,6 +549,25 @@ function PersonalEssentials({ p, onSaved }: { p: Profile; onSaved: () => void })
         <h2 className="h2">Ses audios, fichiers et liens personnels</h2>
         <ResourceManager riderId={p.id} />
       </section>
+    </div>
+  );
+}
+
+/* ---------- Progression de formation ---------- */
+function TrainingSummary({ p }: { p: Profile }) {
+  const { settings } = useMe();
+  const { modules, done, current } = useTraining(p, settings);
+  if (modules.length === 0) return null;
+  return (
+    <div className="stack-sm">
+      <h3 className="h3">Formation : {done.size} module{done.size > 1 ? "s" : ""} terminé{done.size > 1 ? "s" : ""} sur {modules.length}</h3>
+      <div className="progress"><div style={{ width: `${Math.round((done.size / modules.length) * 100)}%` }} /></div>
+      {modules.map((m) => (
+        <div key={m.id} className="small row" style={{ gap: 6 }}>
+          <span aria-hidden="true">{done.has(m.id) ? "✅" : current?.id === m.id ? "▶️" : "⬜️"}</span>
+          <span>{m.title}</span>
+        </div>
+      ))}
     </div>
   );
 }

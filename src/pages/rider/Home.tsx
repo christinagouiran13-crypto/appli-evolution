@@ -9,6 +9,7 @@ import type { Competition, Message, Session } from "../../lib/types";
 import { Icon } from "../../components/Icon";
 import logo from "../../components/logo-vert.svg";
 import { InstallHint } from "../../components/InstallHint";
+import { useTraining } from "../../lib/training";
 import { UrgentButton } from "../../components/UrgentButton";
 
 type Data = {
@@ -23,6 +24,7 @@ type Data = {
 
 export default function Home() {
   const { me, settings } = useMe();
+  const training = useTraining(me, settings);
   const [d, setD] = useState<Data | null>(null);
   const active = me.status === "active";
 
@@ -106,13 +108,22 @@ export default function Home() {
             <TaskLink to={`/concours/debrief?concours=${d.debriefTodo.id}`} icon="flag"
               title={`Débrief du concours ${relativeDay(d.debriefTodo.date + "T12:00:00")}`} sub="5 minutes" done={false} />
           )}
-          {me.current_module && (
+          {training.modules.length > 0 ? (
+            <Link to="/formation" className="card card-link">
+              <div className="icon-tile"><Icon name="play" size={20} /></div>
+              <div className="grow">
+                <div className="h3">{training.current ? training.current.title : "Formation terminée, bravo !"}</div>
+                <div className="small muted">Ma formation · {training.done.size} sur {training.modules.length} modules</div>
+              </div>
+              <Icon name="chevron" size={18} />
+            </Link>
+          ) : me.current_module ? (
             <a href={settings?.training_url} target="_blank" rel="noreferrer" className="card card-link">
               <div className="icon-tile"><Icon name="play" size={20} /></div>
               <div className="grow"><div className="h3">{me.current_module}</div><div className="small muted">Sur ta plateforme de formation</div></div>
               <Icon name="external" size={18} />
             </a>
-          )}
+          ) : null}
         </div>
       )}
 

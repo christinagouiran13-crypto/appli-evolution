@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
 import { fmtShort } from "../../lib/dates";
@@ -12,7 +13,7 @@ import { ShareVictory } from "../../components/ShareVictory";
 import { Celebration } from "../../components/Celebration";
 
 export default function Progress() {
-  const { me, settings, refresh } = useMe();
+  const { me } = useMe();
   const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [badges, setBadges] = useState<Record<string, string>>({});
   const [share, setShare] = useState(false);
@@ -28,13 +29,6 @@ export default function Progress() {
   const streak = computeStreak(checkins.map((c) => c.week_start));
   const last = checkins.slice(-12);
 
-  async function finishModule() {
-    if (!confirm(`Tu as terminé « ${me.current_module} » ?`)) return;
-    await supabase.rpc("complete_module");
-    await refresh();
-    load();
-    setModuleDone(true);
-  }
 
   return (
     <div className="page">
@@ -94,12 +88,7 @@ export default function Progress() {
       {me.status === "active" && (
         <div className="stack">
           <button className="btn btn-block" onClick={() => setShare(true)}><Icon name="trophy" size={20} />Partager une victoire au groupe</button>
-          {me.current_module && (
-            <>
-              <a className="btn btn-light btn-block" href={settings?.training_url} target="_blank" rel="noreferrer"><Icon name="play" size={20} />Ma formation : {me.current_module}</a>
-              <button className="btn btn-ghost" onClick={finishModule}>J'ai terminé ce module</button>
-            </>
-          )}
+          <Link className="btn btn-light btn-block" to="/formation"><Icon name="play" size={20} />Ma formation</Link>
         </div>
       )}
 
