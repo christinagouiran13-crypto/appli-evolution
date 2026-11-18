@@ -24,8 +24,10 @@ export function useCoachData() {
       supabase.from("competitions").select("*").gte("date", today).order("date"),
       supabase.rpc("coach_alerts"),
     ]);
-    const [{ data: ns }, { data: fb }] = await Promise.all([supabase.rpc("coach_new_signups"), supabase.rpc("coach_feedback_alerts")]);
-    const al = [...((a.data as Alert[]) ?? []), ...((fb as Alert[]) ?? []), ...((ns as Alert[]) ?? [])];
+    const [{ data: ns }, { data: fb }, { data: it }] = await Promise.all([
+      supabase.rpc("coach_new_signups"), supabase.rpc("coach_feedback_alerts"), supabase.rpc("coach_interest_alerts"),
+    ]);
+    const al = [...((a.data as Alert[]) ?? []), ...((it as Alert[]) ?? []), ...((fb as Alert[]) ?? []), ...((ns as Alert[]) ?? [])];
     const checkins = (c.data as Checkin[]) ?? [];
     const list = ((p.data as Profile[]) ?? []).map((r) => {
       const mine = checkins.filter((x) => x.rider_id === r.id);

@@ -6,6 +6,7 @@ import { useTraining, type TrainingModule } from "../../lib/training";
 import { BackHeader } from "../../components/BackHeader";
 import { Icon } from "../../components/Icon";
 import { Celebration } from "../../components/Celebration";
+import { Parcours } from "../../components/Parcours";
 
 export default function Formation() {
   const { me, settings } = useMe();
@@ -90,6 +91,8 @@ export default function Formation() {
           </div>
         </>
       )}
+      <Parcours progressLabel={modules.length ? `${done.size} module${done.size > 1 ? "s" : ""} terminé${done.size > 1 ? "s" : ""} sur ${modules.length}` : undefined} />
+
       {cele && (
         <Celebration title="Module validé !" onClose={() => setCele(null)}>
           <p style={{ margin: 0 }}>Bravo pour « {cele} ». Christina voit ta progression.</p>

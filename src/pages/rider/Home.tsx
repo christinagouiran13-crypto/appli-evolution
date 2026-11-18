@@ -127,6 +127,14 @@ export default function Home() {
         </div>
       )}
 
+      {me.status === "alumni" && (
+        <Link to="/formation" className="card-soft card-link" style={{ textDecoration: "none", color: "inherit" }}>
+          <div className="icon-tile" style={{ background: "#fff" }}><Icon name="star" size={20} /></div>
+          <div className="grow"><div className="h3">Et maintenant ?</div><div className="small muted">Découvre la suite de ton parcours Évolution</div></div>
+          <Icon name="chevron" size={18} />
+        </Link>
+      )}
+
       {streak && streak.count > 0 && (
         <Link to="/progression" className="card card-link">
           <span className="flame" style={{ color: streak.paused ? "#9AA9A3" : "#E07A5F", transform: `scale(${Math.min(1.6, 1 + streak.count * 0.06)})` }}>

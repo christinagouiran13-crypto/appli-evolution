@@ -13,6 +13,7 @@ const ACTION: Record<string, { label: string; tab: string }> = {
   urgent: { label: "Lui répondre maintenant", tab: "messages" },
   new_signup: { label: "Vérifier sa fiche", tab: "gestion" },
   feedback_unread: { label: "Lire le feedback", tab: "debriefs" },
+  interest: { label: "Lui répondre", tab: "messages" },
   confidence_drop: { label: "Lui écrire", tab: "messages" },
   stress_high: { label: "Lui écrire", tab: "messages" },
   dropout: { label: "La relancer", tab: "messages" },
@@ -76,7 +77,7 @@ export default function Dashboard() {
               <div key={`${a.kind}-${a.ref_key}`} className={`card card-lg stack-sm ${a.kind === "urgent" ? "card-urgent" : ""}`}>
                 <div className="row-between">
                   <div className="row"><Avatar path={r?.avatar_path} name={r?.first_name ?? "?"} size={32} /><span className="bold">{r?.first_name} {r?.last_name?.slice(0, 1)}{r?.last_name ? "." : ""}</span></div>
-                  <span className={`tag ${a.kind === "message_waiting" || a.kind === "appointment" || a.kind === "new_signup" ? "tag-vert" : "tag-rose"}`} style={a.kind === "urgent" ? { background: "#B3261E", color: "#fff" } : undefined}>{ALERT_LABEL[a.kind] ?? a.kind}</span>
+                  <span className={`tag ${a.kind === "message_waiting" || a.kind === "appointment" || a.kind === "new_signup" || a.kind === "interest" ? "tag-vert" : "tag-rose"}`} style={a.kind === "urgent" ? { background: "#B3261E", color: "#fff" } : undefined}>{ALERT_LABEL[a.kind] ?? a.kind}</span>
                 </div>
                 <div className="small" style={{ color: "#3D524B" }}>{a.detail}</div>
                 <div className="tiny muted">{relativeDay(a.created_at)}</div>
