@@ -5,6 +5,7 @@ import { useAuth } from "../../lib/auth";
 import type { JuniorMission } from "../../lib/types";
 import { ResourceManager } from "../../components/Resources";
 import { TrainingAdmin } from "../../components/TrainingAdmin";
+import { OffersAdmin } from "../../components/OffersAdmin";
 import { Icon } from "../../components/Icon";
 import { newId, signedUrl, upload } from "../../lib/storage";
 
@@ -53,6 +54,8 @@ export default function CoachEssentials() {
       </section>
 
       <TrainingAdmin />
+
+      <OffersAdmin />
 
       <Missions />
     </div>

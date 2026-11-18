@@ -50,6 +50,7 @@ export const ALERT_LABEL: Record<string, string> = {
   urgent: "URGENCE",
   new_signup: "Nouvelle inscription",
   feedback_unread: "Feedback à lire",
+  interest: "Intéressée par la suite",
   confidence_drop: "Confiance en baisse",
   stress_high: "Stress élevé",
   dropout: "Décrochage",

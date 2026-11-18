@@ -310,3 +310,11 @@ hr.sep { border: none; border-top: 1px solid var(--bord); margin: 4px 0; width: 
 .msg-wide { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
 .msg-wide .coach-chat { height: calc(100dvh - 190px); }
 @media (max-width: 899px) { .coach .coach-chat { height: calc(100dvh - 120px); } }
+
+/* Ton parcours Évolution */
+.parcours { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; position: relative; }
+.parcours-step { display: flex; gap: 12px; align-items: flex-start; position: relative; }
+.parcours-step:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 30px; bottom: -14px; width: 2px; background: var(--bord-fort); }
+.parcours-dot { width: 28px; height: 28px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background: var(--blanc); border: 2px solid var(--bord-fort); color: var(--texte-doux); margin-top: 12px; z-index: 1; }
+.parcours-step.current .parcours-dot { background: var(--vert-fonce); border-color: var(--vert-fonce); color: #fff; }
+.parcours-step.done .parcours-dot { background: var(--vert); border-color: var(--vert); color: #fff; }

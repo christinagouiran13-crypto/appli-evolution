@@ -44,6 +44,7 @@ export type Settings = {
   program_weeks: { starter90: number; levelup180: number };
   rescue_text: string;
   signup_code: string;
+  offers: Record<string, { title: string; tagline: string; description: string }>;
 };
 
 export type Checkin = {
