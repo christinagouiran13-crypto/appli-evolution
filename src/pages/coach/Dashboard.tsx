@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
-import { fmtShort, programProgress, relativeDay } from "../../lib/dates";
+import { fmtShort, programProgress, relativeDay, todayISO } from "../../lib/dates";
 import { useMe } from "../../lib/auth";
 import { ALERT_LABEL, PROGRAM_LABEL } from "../../lib/text";
 import type { Alert } from "../../lib/types";
@@ -134,6 +134,7 @@ function Row({ r, onOpen, settings }: { r: ClientRow; onOpen: () => void; settin
           <div><Link to={`/coach/cliente/${r.id}`} className="bold" style={{ color: "inherit", textDecoration: "none" }} onClick={(e) => e.stopPropagation()}>{r.first_name} {r.last_name}</Link>
             {r.alerts.length > 0 && <div className="tiny" style={{ color: "var(--rose-texte)" }}>{r.alerts.map((a) => ALERT_LABEL[a.kind]).join(" · ")}</div>}
             {!r.activated_at && <div className="tiny muted">Invitation pas encore ouverte</div>}
+            {r.pause_until && r.pause_until >= todayISO() && <div className="tiny" style={{ color: "var(--vert)" }}>⏸️ En pause jusqu'au {fmtShort(r.pause_until)}</div>}
           </div></div>
       </td>
       <td>{r.program ? PROGRAM_LABEL[r.program] : "—"}</td>

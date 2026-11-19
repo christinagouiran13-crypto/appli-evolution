@@ -59,10 +59,15 @@ export function relativeDay(iso: string) {
 export function programProgress(p: Profile, s: Settings | null) {
   if (!p.program || !p.program_start || p.program === "club") return null;
   const totalWeeks = s?.program_weeks?.[p.program] ?? (p.program === "starter90" ? 12 : 26);
-  const elapsed = Math.max(0, daysBetween(p.program_start, todayISO()));
+  // Les jours de pause ne comptent pas dans le programme
+  const pauseDays = p.pause_days ?? 0;
+  const today = todayISO();
+  const remainingPause = p.pause_until && p.pause_until >= today ? daysBetween(today, p.pause_until) + 1 : 0;
+  const pausedSoFar = Math.max(0, pauseDays - remainingPause);
+  const elapsed = Math.max(0, daysBetween(p.program_start, today) - pausedSoFar);
   const week = Math.min(totalWeeks, Math.floor(elapsed / 7) + 1);
   const pct = Math.min(100, Math.round((elapsed / (totalWeeks * 7)) * 100));
-  const end = addDays(p.program_start, totalWeeks * 7);
+  const end = addDays(p.program_start, totalWeeks * 7 + pauseDays);
   if (p.program === "levelup180") {
     const months = Math.round(totalWeeks / 4.33);
     const month = Math.min(months, Math.floor(elapsed / 30.4) + 1);

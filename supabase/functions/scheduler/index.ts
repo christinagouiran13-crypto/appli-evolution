@@ -51,6 +51,7 @@ function fill(tpl: string, rider: Rider, extra: Record<string, string> = {}) {
 type Rider = {
   id: string; first_name: string; gender: string; program: string | null; program_start: string | null;
   created_at: string; activated_at: string | null; notif_prefs: Record<string, boolean>;
+  pause_until: string | null; pause_days: number;
 };
 
 type Ctx = {
@@ -104,13 +105,15 @@ Deno.serve(async (req) => {
   const weeks = (settings?.program_weeks ?? { starter90: 12, levelup180: 26 }) as Record<string, number>;
 
   const { data: riderRows } = await db.from("profiles")
-    .select("id, first_name, gender, program, program_start, created_at, activated_at, notif_prefs")
+    .select("id, first_name, gender, program, program_start, created_at, activated_at, notif_prefs, pause_until, pause_days")
     .eq("role", "rider").eq("status", "active").not("activated_at", "is", null);
   // Accompagnement terminé (date de fin dépassée) : plus aucun message automatique
   const ended = (r: Rider) =>
     (r.program === "starter90" || r.program === "levelup180") && !!r.program_start &&
-    today > addDays(r.program_start, (weeks[r.program] ?? (r.program === "starter90" ? 12 : 26)) * 7);
-  const riders = ((riderRows ?? []) as Rider[]).filter((r) => !ended(r));
+    today > addDays(r.program_start, (weeks[r.program] ?? (r.program === "starter90" ? 12 : 26)) * 7 + (r.pause_days ?? 0));
+  // En pause (vacances…) : aucun message automatique
+  const paused = (r: Rider) => !!r.pause_until && r.pause_until >= today;
+  const riders = ((riderRows ?? []) as Rider[]).filter((r) => !ended(r) && !paused(r));
   const byId = new Map(riders.map((r) => [r.id, r]));
 
   // 1. Message du mardi (à partir de 9 h), deux versions en alternance
@@ -175,7 +178,7 @@ Deno.serve(async (req) => {
   if (hour >= 10) {
     for (const r of riders) {
       if (r.program !== "starter90" || !r.program_start) continue;
-      const end = addDays(r.program_start, (weeks.starter90 ?? 12) * 7);
+      const end = addDays(r.program_start, (weeks.starter90 ?? 12) * 7 + (r.pause_days ?? 0));
       if (today >= addDays(end, -7) && today <= end) {
         await deliver(ctx, r, "end_starter", "end_starter", r.program_start, "session", "/seances");
       }

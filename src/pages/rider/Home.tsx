@@ -85,6 +85,13 @@ export default function Home() {
 
       <InstallHint />
 
+      {me.pause_until && me.pause_until >= todayISO() && (
+        <div className="card-soft stack-sm">
+          <div className="h3">⏸️ Ton accompagnement est en pause</div>
+          <div className="small">Jusqu'au {fmtDate(me.pause_until)} inclus. Profite bien ! Ton programme est rallongé d'autant, et tu peux toujours écrire à Christina.</div>
+        </div>
+      )}
+
       {d?.nextComp && (
         <div className="card-rose stack">
           <div className="eyebrow rose">Prochain concours</div>

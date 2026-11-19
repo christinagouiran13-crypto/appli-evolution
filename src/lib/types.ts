@@ -31,6 +31,8 @@ export type Profile = {
   rescue_text: string | null;
   junior_mission_index: number;
   self_signup: boolean;
+  pause_until: string | null;
+  pause_days: number;
   created_at: string;
 };
 
