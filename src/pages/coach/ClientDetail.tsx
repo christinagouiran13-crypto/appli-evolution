@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { callFunction, supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
-import { addDays, fmtDate, fmtDateTime, fmtShort, programProgress, relativeDay } from "../../lib/dates";
+import { addDays, daysBetween, fmtDate, fmtDateTime, fmtShort, programProgress, relativeDay, todayISO } from "../../lib/dates";
 import { BADGES, PROGRAM_LABEL, STARTER_SESSIONS, badgeName } from "../../lib/text";
 import { newId, upload } from "../../lib/storage";
 import type { Checkin, Debrief, Feedback, Phase, Profile, Routine, RoutineAudio, Session, WeeklyGoals } from "../../lib/types";
@@ -50,6 +50,7 @@ export default function ClientDetail() {
             {p.status === "alumni" ? " · ancienne cliente" : p.status === "archived" ? " · archivée" : ""}
             {p.discipline ? ` · ${p.discipline}` : ""}{p.level ? ` ${p.level}` : ""}{p.horse_name ? ` · avec ${p.horse_name}` : ""}
             {p.is_junior ? " · junior" : ""}
+            {isPaused(p) ? ` · ⏸️ en pause jusqu'au ${fmtShort(p.pause_until)}` : ""}
           </div>
           {p.season_goal && <div className="small">Objectif de saison : <b>{p.season_goal}</b> ({p.season_goal_progress} %)</div>}
         </div>
@@ -491,6 +492,8 @@ function Gestion({ p, onSaved }: { p: Profile; onSaved: () => void }) {
         {link && <InviteLink link={link} firstName={p.first_name} email={p.email ?? ""} isNew={!p.activated_at} />}
       </section>
 
+      {p.status === "active" && <PauseCard p={p} onSaved={onSaved} />}
+
       <section className="card card-lg stack">
         <h2 className="h2">Statut</h2>
         <div className="small">
@@ -570,5 +573,61 @@ function TrainingSummary({ p }: { p: Profile }) {
         </div>
       ))}
     </div>
+  );
+}
+
+/* ---------- Pause (vacances…) ---------- */
+export function isPaused(p: Pick<Profile, "pause_until">) {
+  return !!p.pause_until && p.pause_until >= todayISO();
+}
+
+function PauseCard({ p, onSaved }: { p: Profile; onSaved: () => void }) {
+  const today = todayISO();
+  const paused = isPaused(p);
+  const [until, setUntil] = useState(addDays(today, 14));
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function start(u: string) {
+    if (u < today) return setMsg("Choisis une date à venir.");
+    const days = daysBetween(today, u) + 1;
+    const { error } = await supabase.from("profiles").update({ pause_until: u, pause_days: (p.pause_days ?? 0) + days }).eq("id", p.id);
+    setMsg(error ? "Pas enregistré." : null);
+    onSaved();
+  }
+  async function stop() {
+    if (!p.pause_until) return;
+    const unused = Math.max(0, daysBetween(today, p.pause_until)); // jours de pause non utilisés (à partir de demain)
+    const { error } = await supabase.from("profiles").update({ pause_until: null, pause_days: Math.max(0, (p.pause_days ?? 0) - unused) }).eq("id", p.id);
+    setMsg(error ? "Pas enregistré." : null);
+    onSaved();
+  }
+
+  return (
+    <section className="card card-lg stack">
+      <h2 className="h2">Pause</h2>
+      {paused ? (
+        <>
+          <div className="success">⏸️ En pause jusqu'au <b>{fmtDate(p.pause_until!, { weekday: "long", day: "numeric", month: "long" })}</b> inclus.</div>
+          <div className="small">Pas de messages automatiques ni d'alerte « décrochage » pendant la pause. Son programme est rallongé d'autant. Elle garde l'appli, le groupe et la messagerie.</div>
+          <button className="btn btn-sm" style={{ alignSelf: "flex-start" }} onClick={stop}>Reprendre maintenant</button>
+        </>
+      ) : (
+        <>
+          <div className="small">Vacances, blessure, pause d'hiver… Pendant la pause : pas de messages automatiques ni d'alerte, et son programme est rallongé de la durée de la pause. La pause s'arrête toute seule à la date choisie.</div>
+          <div className="pills">
+            <button className="pill" onClick={() => start(addDays(today, 6))}>1 semaine</button>
+            <button className="pill" onClick={() => start(addDays(today, 14))}>15 jours</button>
+            <button className="pill" onClick={() => start(addDays(today, 29))}>1 mois</button>
+          </div>
+          <div className="row wrap">
+            <label className="small" htmlFor={`pause-${p.id}`}>Ou jusqu'au</label>
+            <input id={`pause-${p.id}`} className="input" style={{ maxWidth: 200 }} type="date" min={today} value={until} onChange={(e) => setUntil(e.target.value)} />
+            <button className="btn btn-sm btn-light" onClick={() => start(until)}>Mettre en pause</button>
+          </div>
+        </>
+      )}
+      {(p.pause_days ?? 0) > 0 && <div className="tiny muted">Programme rallongé de {p.pause_days} jour{p.pause_days > 1 ? "s" : ""} au total grâce aux pauses.</div>}
+      {msg && <div className="error">{msg}</div>}
+    </section>
   );
 }
