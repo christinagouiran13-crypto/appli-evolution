@@ -148,7 +148,12 @@ Deno.serve(async (req) => {
     for (const r of riders) {
       const { data: last } = await db.from("checkins").select("id, created_at")
         .eq("rider_id", r.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
-      const since = new Date(last?.created_at ?? r.activated_at!);
+      let since = new Date(last?.created_at ?? r.activated_at!);
+      // Après une pause, les 7 jours repartent de la fin de la pause
+      if (r.pause_until) {
+        const back = new Date(addDays(r.pause_until, 1) + "T08:00:00Z");
+        if (back > since) since = back;
+      }
       if (now.getTime() - since.getTime() >= 7 * 86400000) {
         await deliver(ctx, r, "no_checkin_7d", "no_checkin_7d", last?.id ?? "none", "checkin", "/checkin");
       }
