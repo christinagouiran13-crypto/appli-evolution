@@ -51,7 +51,7 @@ function fill(tpl: string, rider: Rider, extra: Record<string, string> = {}) {
 type Rider = {
   id: string; first_name: string; gender: string; program: string | null; program_start: string | null;
   created_at: string; activated_at: string | null; notif_prefs: Record<string, boolean>;
-  pause_until: string | null; pause_days: number;
+  pause_until: string | null; pause_days: number; is_junior: boolean;
 };
 
 type Ctx = {
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
   const weeks = (settings?.program_weeks ?? { starter90: 12, levelup180: 26 }) as Record<string, number>;
 
   const { data: riderRows } = await db.from("profiles")
-    .select("id, first_name, gender, program, program_start, created_at, activated_at, notif_prefs, pause_until, pause_days")
+    .select("id, first_name, gender, program, program_start, created_at, activated_at, notif_prefs, pause_until, pause_days, is_junior")
     .eq("role", "rider").eq("status", "active").not("activated_at", "is", null);
   // Accompagnement terminé (date de fin dépassée) : plus aucun message automatique
   const ended = (r: Rider) =>
@@ -217,6 +217,32 @@ Deno.serve(async (req) => {
       if (!byId.has(s.rider_id)) continue;
       const { data: ok } = await db.rpc("deliver_junior_mission", { sid: s.id });
       if (ok) ctx.sent.push(`junior_mission:${byId.get(s.rider_id)!.first_name}`);
+    }
+  }
+
+  // 6 quater. Juniors : 7 jours après chaque séance, « comment ça va cette semaine ? »
+  // (pas le mardi, jour du message de la semaine : il part alors le lendemain)
+  if (hour >= 10 && weekday !== "Tue") {
+    const { data: done } = await db.from("sessions").select("id, rider_id, scheduled_at")
+      .lte("scheduled_at", new Date(now.getTime() - 7 * 86400000).toISOString())
+      .gte("scheduled_at", new Date(now.getTime() - 10 * 86400000).toISOString());
+    for (const s of done ?? []) {
+      const r = byId.get(s.rider_id);
+      if (!r || !r.is_junior) continue;
+      const { data: next } = await db.from("sessions").select("scheduled_at, booked_at")
+        .eq("rider_id", r.id).eq("done", false)
+        .or(`scheduled_at.gt.${now.toISOString()},and(scheduled_at.is.null,booked_at.not.is.null)`)
+        .order("scheduled_at", { ascending: true, nullsFirst: false }).limit(1).maybeSingle();
+      if (next?.scheduled_at) {
+        const d = new Date(next.scheduled_at);
+        const date = new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" }).format(d);
+        const heure = new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(d).replace(":", " h ");
+        await deliver(ctx, r, "junior_midway_booked", "junior_midway", s.id, "session", "/seances", { date, heure });
+      } else if (next) {
+        continue; // réservée mais date inconnue : pas de message
+      } else {
+        await deliver(ctx, r, "junior_midway", "junior_midway", s.id, "session", "/seances");
+      }
     }
   }
 
