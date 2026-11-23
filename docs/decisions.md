@@ -52,3 +52,4 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - Idée gardée pour plus tard : défi du lundi programmé à l'avance.
 - **Pause** (fiche → Gestion) : 1 semaine, 15 jours, 1 mois ou jusqu'à une date. Pendant la pause : pas de messages automatiques ni d'alerte « décrochage » ; programme rallongé d'autant ; la cavalière garde l'appli, le groupe et la messagerie. « Reprendre maintenant » rend les jours non utilisés.
 - **Feedback accessible à toutes** : aussi aux anciennes clientes ; bouton « Feedback après concours » toujours visible dans l'onglet Concours ; anciennes fiches « questionnaire » sans lien masquées ; l'appli vérifie les mises à jour à chaque retour.
+- **Retour de pause** : la relance « 7 jours sans check-in » et l'alerte « décrochage » comptent à partir de la fin de la pause. Vérifié par simulation : aucun message automatique aux anciennes clientes, aux programmes terminés ni pendant une pause.
