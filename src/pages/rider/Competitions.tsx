@@ -40,6 +40,7 @@ export default function Competitions() {
         <div className="row wrap">
           <button className="btn btn-sm" onClick={() => setAdding("new")}><Icon name="plus" size={18} />Ajouter un concours</button>
           <Link className="btn btn-sm btn-light" to="/concours/debrief?type=cours">Débrief après un cours</Link>
+          <Link className="btn btn-sm btn-light" to="/concours/feedback">Feedback après concours</Link>
         </div>
       )}
 

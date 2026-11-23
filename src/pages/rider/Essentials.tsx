@@ -26,7 +26,8 @@ export default function Essentials() {
     supabase.from("routine_audios").select("*").eq("rider_id", me.id).order("created_at").then(({ data }) => setAudios((data as RoutineAudio[]) ?? []));
   }, [me.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const feedback = list.filter((r) => r.category === "feedback");
+  // Anciennes ressources « questionnaire » sans lien ni fichier : inutiles (le questionnaire est intégré)
+  const feedback = list.filter((r) => r.category === "feedback" && (r.url || r.path));
   const audioRes = list.filter((r) => r.category === "audio");
   const files = list.filter((r) => r.category === "fichier" || r.category === "lien");
   const rescue = [me.rescue_text, settings?.rescue_text].filter(Boolean).join("\n\n");
@@ -81,7 +82,7 @@ export default function Essentials() {
 
       <section className="stack">
         <h2 className="h2">Questionnaire de feedback</h2>
-        {me.status === "active" && (
+        {(me.status === "active" || me.status === "alumni") && (
           <Link to="/concours/feedback" className="card card-link">
             <div className="icon-tile"><Icon name="edit" size={20} /></div>
             <div className="grow"><div className="h3">Remplir mon feedback après concours</div><div className="small muted">7 questions pour faire le point avec Christina</div></div>

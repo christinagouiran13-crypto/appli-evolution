@@ -51,3 +51,4 @@ Date : 10 novembre 2026. Ces choix complètent le cahier des charges (version 1)
 - **Mur des victoires** : toutes les victoires partagées (texte + photo), avec ❤️ ; accès depuis le groupe, la progression et l'espace coach.
 - Idée gardée pour plus tard : défi du lundi programmé à l'avance.
 - **Pause** (fiche → Gestion) : 1 semaine, 15 jours, 1 mois ou jusqu'à une date. Pendant la pause : pas de messages automatiques ni d'alerte « décrochage » ; programme rallongé d'autant ; la cavalière garde l'appli, le groupe et la messagerie. « Reprendre maintenant » rend les jours non utilisés.
+- **Feedback accessible à toutes** : aussi aux anciennes clientes ; bouton « Feedback après concours » toujours visible dans l'onglet Concours ; anciennes fiches « questionnaire » sans lien masquées ; l'appli vérifie les mises à jour à chaque retour.
