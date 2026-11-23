@@ -13,6 +13,8 @@ const WHEN: Record<string, string> = {
   no_checkin_7d: "Après 7 jours sans check-in, à 10 h (une seule fois).",
   eve_session: "La veille d'une séance, à 18 h.",
   end_starter: "Une semaine avant la fin de Starter 90, à 10 h.",
+  junior_midway: "Juniors : 7 jours après chaque séance, à 10 h, si la séance suivante n'est pas encore réservée.",
+  junior_midway_booked: "Juniors : 7 jours après chaque séance, à 10 h, si la séance suivante est déjà réservée ({date}, {heure}).",
   session_reminder: "Tous les 15 jours à 10 h, seulement si aucune séance n'est prévue (sauf juniors).",
   junior_mission: "Juniors : tous les 15 jours à 10 h, avec la mission suivante de ta liste (page Indispensables).",
 };
