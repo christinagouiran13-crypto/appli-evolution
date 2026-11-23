@@ -44,7 +44,7 @@ export default function FeedbackForm() {
     setSent(true);
   }
 
-  if (me.status !== "active") return <div className="page"><BackHeader /><div className="empty">Le questionnaire est réservé aux accompagnements en cours.</div></div>;
+  if (me.status !== "active" && me.status !== "alumni") return <div className="page"><BackHeader /><div className="empty">Le questionnaire est réservé aux accompagnements en cours.</div></div>;
 
   return (
     <div className="page">
