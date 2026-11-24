@@ -4,7 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../lib/auth";
 import { compressImage, upload } from "../../lib/storage";
 import { currentPushState, disablePush, enablePush, isIOS, isStandalone } from "../../lib/push";
-import { PROGRAM_LABEL, g } from "../../lib/text";
+import { g, programLabel } from "../../lib/text";
 import { fmtDate } from "../../lib/dates";
 import type { Profile as P } from "../../lib/types";
 import { BackHeader } from "../../components/BackHeader";
@@ -73,7 +73,7 @@ export default function Profile() {
         </button>
         <div className="grow">
           <h1 className="h1" style={{ fontSize: 26 }}>{me.first_name} {me.last_name}</h1>
-          {isRider && me.program && <div className="muted small">{PROGRAM_LABEL[me.program]}{me.program_start ? ` depuis le ${fmtDate(me.program_start, { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>}
+          {isRider && me.program && <div className="muted small">{programLabel(me)}{me.program_start ? ` depuis le ${fmtDate(me.program_start, { day: "numeric", month: "long", year: "numeric" })}` : ""}</div>}
           <button className="btn btn-ghost btn-sm" style={{ padding: 0 }} onClick={() => fileRef.current?.click()}>Changer ma photo</button>
         </div>
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { const file = e.target.files?.[0]; if (file) changePhoto(file); e.target.value = ""; }} />

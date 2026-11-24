@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { fmtShort, programProgress } from "../lib/dates";
-import { BADGES, PROGRAM_LABEL, badgeName } from "../lib/text";
+import { BADGES, badgeName, programLabel } from "../lib/text";
 import type { Checkin, Profile, Settings } from "../lib/types";
 import { LineChart } from "./LineChart";
 import { Icon } from "./Icon";
@@ -40,7 +40,7 @@ export function Bilan({ p, settings }: { p: Profile; settings: Settings | null }
   const first = s.checkins[0];
   const last = s.checkins[s.checkins.length - 1];
   const prog = programProgress(p, settings);
-  const name = p.program ? PROGRAM_LABEL[p.program] : "ton accompagnement";
+  const name = p.program ? programLabel(p) : "ton accompagnement";
 
   return (
     <div className="stack-lg">

@@ -4,7 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
 import { currentWeek, daysBetween, fmtDate, fmtDateTime, programProgress, relativeDay, todayISO, addDays } from "../../lib/dates";
 import { computeStreak } from "../../lib/streak";
-import { PROGRAM_LABEL, g } from "../../lib/text";
+import { g, programLabel } from "../../lib/text";
 import type { Competition, Message, Session } from "../../lib/types";
 import { Icon } from "../../components/Icon";
 import logo from "../../components/logo-vert.svg";
@@ -75,12 +75,12 @@ export default function Home() {
           <div className="muted">Ancienne {g(me, "cliente", "client")} Évolution · ton historique reste à toi</div>
         ) : prog ? (
           <>
-            <div className="muted">{prog.label} · {PROGRAM_LABEL[me.program!]}</div>
+            <div className="muted">{prog.label} · {programLabel(me)}</div>
             <div className="progress" style={{ marginTop: 6 }} role="progressbar" aria-valuenow={prog.pct} aria-valuemin={0} aria-valuemax={100}>
               <div style={{ width: `${prog.pct}%` }} />
             </div>
           </>
-        ) : me.program ? <div className="muted">{PROGRAM_LABEL[me.program]}</div> : null}
+        ) : me.program ? <div className="muted">{programLabel(me)}</div> : null}
       </div>
 
       <InstallHint />
