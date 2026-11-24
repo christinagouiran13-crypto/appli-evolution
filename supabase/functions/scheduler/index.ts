@@ -59,7 +59,13 @@ type Ctx = {
   coachId: string;
   templates: Record<string, { body: string; enabled: boolean }>;
   sent: string[];
+  chat: Set<string>; // échange dans la conversation privée depuis moins de 48 h
+  hold: Set<string>; // message automatique depuis moins de 3 jours
+  weekday: string;
 };
+
+// Messages « prendre des nouvelles » : jamais deux de suite, ni juste après un échange
+const NUDGES = new Set(["tuesday", "no_checkin_7d", "session_reminder", "junior_midway"]);
 
 // Envoie un message automatique (conversation privée + notification), une seule fois.
 async function deliver(
@@ -68,6 +74,13 @@ async function deliver(
 ) {
   const tpl = ctx.templates[code];
   if (!tpl || !tpl.enabled) return;
+  const nudge = NUDGES.has(logCode);
+  if (nudge) {
+    if (ctx.chat.has(rider.id)) return;
+    // Le message du mardi reste prioritaire ; les autres relances partent du mercredi au dimanche,
+    // jamais moins de 3 jours après un autre message automatique.
+    if (logCode !== "tuesday" && (ctx.hold.has(rider.id) || ctx.weekday === "Mon" || ctx.weekday === "Tue")) return;
+  }
   const { error: logErr } = await ctx.db.from("auto_message_log")
     .insert({ rider_id: rider.id, code: logCode, ref_key: refKey });
   if (logErr) return; // déjà envoyé
@@ -79,6 +92,7 @@ async function deliver(
     await sendPush(ctx.db, [rider.id], { title: "Christina", body: truncate(text), url, tag: code });
   }
   ctx.sent.push(`${code}:${rider.first_name}`);
+  if (nudge) ctx.hold.add(rider.id);
 }
 
 Deno.serve(async (req) => {
@@ -97,7 +111,7 @@ Deno.serve(async (req) => {
 
   const { data: tpls } = await db.from("auto_messages").select("code, body, enabled");
   const ctx: Ctx = {
-    db, coachId: coach.id, sent: [],
+    db, coachId: coach.id, sent: [], chat: new Set(), hold: new Set(), weekday,
     templates: Object.fromEntries((tpls ?? []).map((t) => [t.code, t])),
   };
 
@@ -116,18 +130,23 @@ Deno.serve(async (req) => {
   const riders = ((riderRows ?? []) as Rider[]).filter((r) => !ended(r) && !paused(r));
   const byId = new Map(riders.map((r) => [r.id, r]));
 
-  // Échange récent (48 h) dans la conversation privée : pas de message « prendre des nouvelles »
-  const { data: recentRows } = await db.from("messages").select("thread_rider_id")
+  // Pas de message « prendre des nouvelles » si :
+  //  - un échange a eu lieu dans la conversation privée dans les 48 dernières heures ;
+  //  - un message automatique est déjà parti dans les 3 derniers jours.
+  const { data: chatRows } = await db.from("messages").select("thread_rider_id")
     .not("thread_rider_id", "is", null).neq("kind", "auto")
     .gte("created_at", new Date(now.getTime() - 48 * 3600 * 1000).toISOString());
-  const recentChat = new Set((recentRows ?? []).map((m) => m.thread_rider_id as string));
-  const quiet = riders.filter((r) => !recentChat.has(r.id));
+  const { data: autoRows } = await db.from("messages").select("thread_rider_id")
+    .not("thread_rider_id", "is", null).eq("kind", "auto")
+    .gte("created_at", new Date(now.getTime() - 3 * 86400 * 1000).toISOString());
+  for (const m of chatRows ?? []) ctx.chat.add(m.thread_rider_id as string);
+  for (const m of autoRows ?? []) ctx.hold.add(m.thread_rider_id as string);
 
   // 1. Message du mardi (à partir de 9 h), deux versions en alternance
   if (weekday === "Tue" && hour >= 9) {
     const week = mondayOf(today);
     const code = isoWeekNumber(today) % 2 === 0 ? "tuesday_a" : "tuesday_b";
-    for (const r of quiet) await deliver(ctx, r, code, "tuesday", week, "checkin", "/checkin");
+    for (const r of riders) await deliver(ctx, r, code, "tuesday", week, "checkin", "/checkin");
   }
 
   // 2. Veille de concours (à partir de 18 h)
@@ -152,7 +171,7 @@ Deno.serve(async (req) => {
 
   // 4. Relance douce : 7 jours sans check-in (à partir de 10 h)
   if (hour >= 10) {
-    for (const r of quiet) {
+    for (const r of riders) {
       const { data: last } = await db.from("checkins").select("id, created_at")
         .eq("rider_id", r.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       let since = new Date(last?.created_at ?? r.activated_at!);
@@ -205,7 +224,7 @@ Deno.serve(async (req) => {
     const { data: recent } = await db.from("sessions").select("rider_id")
       .eq("done", false).is("scheduled_at", null).gte("booked_at", new Date(now.getTime() - 15 * 86400000).toISOString());
     const booked = new Set([...(upcoming ?? []), ...(recent ?? [])].map((s) => s.rider_id));
-    for (const r of quiet) {
+    for (const r of riders) {
       if (booked.has(r.id)) continue;
       const since = parisNow(new Date(r.activated_at!)).date;
       const days = Math.round((new Date(today + "T12:00:00Z").getTime() - new Date(since + "T12:00:00Z").getTime()) / 86400000);
@@ -235,7 +254,7 @@ Deno.serve(async (req) => {
       .gte("scheduled_at", new Date(now.getTime() - 10 * 86400000).toISOString());
     for (const s of done ?? []) {
       const r = byId.get(s.rider_id);
-      if (!r || !r.is_junior || recentChat.has(r.id)) continue;
+      if (!r || !r.is_junior) continue;
       const { data: next } = await db.from("sessions").select("scheduled_at, booked_at")
         .eq("rider_id", r.id).eq("done", false)
         .or(`scheduled_at.gt.${now.toISOString()},and(scheduled_at.is.null,booked_at.not.is.null)`)
