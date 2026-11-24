@@ -71,3 +71,10 @@ export const FEEDBACK_QUESTIONS: { key: string; f: string; m: string }[] = [
   { key: "q6", f: "Qu'est-ce que tu aurais aimé avoir en plus (exercice, conseil, préparation…) ?", m: "Qu'est-ce que tu aurais aimé avoir en plus (exercice, conseil, préparation…) ?" },
   { key: "q7", f: "Si tu devais refaire le concours, qu'est-ce que tu changerais ?", m: "Si tu devais refaire le concours, qu'est-ce que tu changerais ?" },
 ];
+
+// Nom du programme affiché (Junior 90 pour les juniors en Starter)
+export function programLabel(p: Pick<Profile, "program" | "is_junior"> | null | undefined) {
+  if (!p?.program) return "";
+  if (p.is_junior && p.program === "starter90") return "Junior 90";
+  return PROGRAM_LABEL[p.program];
+}

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { callFunction, supabase } from "../../lib/supabase";
 import { useMe } from "../../lib/auth";
 import { addDays, daysBetween, fmtDate, fmtDateTime, fmtShort, programProgress, relativeDay, todayISO } from "../../lib/dates";
-import { BADGES, PROGRAM_LABEL, STARTER_SESSIONS, badgeName } from "../../lib/text";
+import { BADGES, PROGRAM_LABEL, STARTER_SESSIONS, badgeName, programLabel } from "../../lib/text";
 import { newId, upload } from "../../lib/storage";
 import type { Checkin, Debrief, Feedback, Phase, Profile, Routine, RoutineAudio, Session, WeeklyGoals } from "../../lib/types";
 import { Avatar } from "../../components/Avatar";
@@ -46,7 +46,7 @@ export default function ClientDetail() {
         <div className="grow" style={{ minWidth: 200 }}>
           <h1 className="h1">{p.first_name} {p.last_name}</h1>
           <div className="muted small">
-            {p.program ? PROGRAM_LABEL[p.program] : ""}{prog ? ` · ${prog.label}` : ""}
+            {programLabel(p)}{prog ? ` · ${prog.label}` : ""}
             {p.status === "alumni" ? " · ancienne cliente" : p.status === "archived" ? " · archivée" : ""}
             {p.discipline ? ` · ${p.discipline}` : ""}{p.level ? ` ${p.level}` : ""}{p.horse_name ? ` · avec ${p.horse_name}` : ""}
             {p.is_junior ? " · junior" : ""}
@@ -408,6 +408,8 @@ function Gestion({ p, onSaved }: { p: Profile; onSaved: () => void }) {
   const [err, setErr] = useState<string | null>(null);
   const [link, setLink] = useState<string | null>(null);
   const [deletion, setDeletion] = useState(false);
+  const [junior, setJunior] = useState(p.is_junior);
+  const [parentOk, setParentOk] = useState(false);
 
   useEffect(() => {
     supabase.from("deletion_requests").select("id").eq("rider_id", p.id).then(({ data }) => setDeletion((data ?? []).length > 0));
@@ -468,9 +470,18 @@ function Gestion({ p, onSaved }: { p: Profile; onSaved: () => void }) {
           <div className="pills"><button className="pill" aria-pressed={f.gender === "f"} onClick={() => setF({ ...f, gender: "f" })}>Cavalière</button>
             <button className="pill" aria-pressed={f.gender === "m"} onClick={() => setF({ ...f, gender: "m" })}>Cavalier</button></div></div>
         <div className="field"><span className="label">Programme</span>
-          <div className="pills">{(["starter90", "levelup180", "club"] as const).map((k) => (
-            <button key={k} className="pill" aria-pressed={f.program === k} onClick={() => setF({ ...f, program: k })}>{PROGRAM_LABEL[k]}</button>
-          ))}</div></div>
+          <div className="pills">
+            {(["starter90", "levelup180", "club"] as const).map((k) => (
+              <button key={k} className="pill" aria-pressed={!junior && f.program === k} onClick={() => { setJunior(false); setF({ ...f, program: k }); }}>{PROGRAM_LABEL[k]}</button>
+            ))}
+            <button className="pill" aria-pressed={junior} onClick={() => { setJunior(true); setF({ ...f, program: "starter90" }); }}>Junior 90</button>
+          </div></div>
+        {junior && !p.is_junior && (
+          <label className="check" style={{ background: "var(--creme)", borderRadius: 12, padding: 10 }}>
+            <input type="checkbox" checked={parentOk} onChange={(e) => setParentOk(e.target.checked)} />
+            <span className="small">J'ai l'accord d'un parent pour son suivi (obligatoire pour une mineure). Ses séances deviennent les 6 séances Junior 90, et elle recevra ses missions.</span>
+          </label>
+        )}
         <div className="field" style={{ maxWidth: 260 }}><label htmlFor="gps">Date de début du programme</label>
           <input id="gps" className="input" type="date" value={f.program_start} onChange={(e) => setF({ ...f, program_start: e.target.value })} />
           {end && <span className="hint">Fin prévue : {fmtDate(end)}</span>}</div>
@@ -478,10 +489,17 @@ function Gestion({ p, onSaved }: { p: Profile; onSaved: () => void }) {
           <input id="gcm" className="input" placeholder="Ex. : Module 3 · Confiance en soi" value={f.current_module} onChange={(e) => setF({ ...f, current_module: e.target.value })} /></div>
         <div className="field"><label htmlFor="gsp">Avancée vers l'objectif de saison : {f.season_goal_progress} %</label>
           <input id="gsp" type="range" min={0} max={100} step={5} value={f.season_goal_progress} onChange={(e) => setF({ ...f, season_goal_progress: Number(e.target.value) })} /></div>
-        <button className="btn btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => save({
+        <button className="btn btn-sm" style={{ alignSelf: "flex-start" }} onClick={async () => {
+          if (junior !== p.is_junior) {
+            if (junior && !parentOk) { setErr("Coche l'accord du parent pour passer en Junior 90."); return; }
+            const { error } = await supabase.rpc("set_junior", { rider: p.id, junior, parent_ok: parentOk });
+            if (error) { setErr(error.message); return; }
+          }
+          await save({
           first_name: f.first_name.trim(), last_name: f.last_name.trim(), gender: f.gender, program: f.program,
           program_start: f.program_start || null, season_goal_progress: f.season_goal_progress, current_module: f.current_module.trim() || null,
-        })}>Enregistrer</button>
+        });
+        }}>Enregistrer</button>
       </section>
 
       <section className="card card-lg stack">

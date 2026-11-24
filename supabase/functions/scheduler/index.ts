@@ -116,11 +116,18 @@ Deno.serve(async (req) => {
   const riders = ((riderRows ?? []) as Rider[]).filter((r) => !ended(r) && !paused(r));
   const byId = new Map(riders.map((r) => [r.id, r]));
 
+  // Échange récent (48 h) dans la conversation privée : pas de message « prendre des nouvelles »
+  const { data: recentRows } = await db.from("messages").select("thread_rider_id")
+    .not("thread_rider_id", "is", null).neq("kind", "auto")
+    .gte("created_at", new Date(now.getTime() - 48 * 3600 * 1000).toISOString());
+  const recentChat = new Set((recentRows ?? []).map((m) => m.thread_rider_id as string));
+  const quiet = riders.filter((r) => !recentChat.has(r.id));
+
   // 1. Message du mardi (à partir de 9 h), deux versions en alternance
   if (weekday === "Tue" && hour >= 9) {
     const week = mondayOf(today);
     const code = isoWeekNumber(today) % 2 === 0 ? "tuesday_a" : "tuesday_b";
-    for (const r of riders) await deliver(ctx, r, code, "tuesday", week, "checkin", "/checkin");
+    for (const r of quiet) await deliver(ctx, r, code, "tuesday", week, "checkin", "/checkin");
   }
 
   // 2. Veille de concours (à partir de 18 h)
@@ -145,7 +152,7 @@ Deno.serve(async (req) => {
 
   // 4. Relance douce : 7 jours sans check-in (à partir de 10 h)
   if (hour >= 10) {
-    for (const r of riders) {
+    for (const r of quiet) {
       const { data: last } = await db.from("checkins").select("id, created_at")
         .eq("rider_id", r.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       let since = new Date(last?.created_at ?? r.activated_at!);
@@ -198,7 +205,7 @@ Deno.serve(async (req) => {
     const { data: recent } = await db.from("sessions").select("rider_id")
       .eq("done", false).is("scheduled_at", null).gte("booked_at", new Date(now.getTime() - 15 * 86400000).toISOString());
     const booked = new Set([...(upcoming ?? []), ...(recent ?? [])].map((s) => s.rider_id));
-    for (const r of riders) {
+    for (const r of quiet) {
       if (booked.has(r.id)) continue;
       const since = parisNow(new Date(r.activated_at!)).date;
       const days = Math.round((new Date(today + "T12:00:00Z").getTime() - new Date(since + "T12:00:00Z").getTime()) / 86400000);
@@ -228,7 +235,7 @@ Deno.serve(async (req) => {
       .gte("scheduled_at", new Date(now.getTime() - 10 * 86400000).toISOString());
     for (const s of done ?? []) {
       const r = byId.get(s.rider_id);
-      if (!r || !r.is_junior) continue;
+      if (!r || !r.is_junior || recentChat.has(r.id)) continue;
       const { data: next } = await db.from("sessions").select("scheduled_at, booked_at")
         .eq("rider_id", r.id).eq("done", false)
         .or(`scheduled_at.gt.${now.toISOString()},and(scheduled_at.is.null,booked_at.not.is.null)`)

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { fmtShort, programProgress, relativeDay, todayISO } from "../../lib/dates";
 import { useMe } from "../../lib/auth";
-import { ALERT_LABEL, PROGRAM_LABEL } from "../../lib/text";
+import { ALERT_LABEL, programLabel } from "../../lib/text";
 import type { Alert } from "../../lib/types";
 import { useCoachData, type ClientRow } from "./useCoachData";
 import { Avatar } from "../../components/Avatar";
@@ -137,7 +137,7 @@ function Row({ r, onOpen, settings }: { r: ClientRow; onOpen: () => void; settin
             {r.pause_until && r.pause_until >= todayISO() && <div className="tiny" style={{ color: "var(--vert)" }}>⏸️ En pause jusqu'au {fmtShort(r.pause_until)}</div>}
           </div></div>
       </td>
-      <td>{r.program ? PROGRAM_LABEL[r.program] : "—"}</td>
+      <td>{r.program ? programLabel(r) : "—"}</td>
       <td className="muted">{r.status === "alumni" ? "Ancienne cliente" : r.status === "archived" ? "Archivée" : prog?.label ?? (r.program === "club" ? "Abonnée" : "—")}</td>
       <td className="muted">{r.lastCheckin ? relativeDay(r.lastCheckin.created_at) : "Aucun"}</td>
       <td>
